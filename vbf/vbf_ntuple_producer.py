@@ -579,6 +579,13 @@ float get_j1_phi(int njet, RVec<int> jet_isgood, RVec<float> jet_phi){
   }
   return -999;
 }
+float get_j1_m(int njet, RVec<int> jet_isgood, RVec<float> jet_m){
+  if (njet<1) return -999;
+  for (unsigned iPart = 0; iPart<jet_m.size(); iPart++) {
+      if (jet_isgood.at(iPart)) return jet_m.at(iPart);
+  }
+  return -999;
+}
 
 float get_j2_pt(int njet, RVec<int> jet_isgood, RVec<float> jet_pt){
   if (njet<2) return -999;
@@ -586,6 +593,36 @@ float get_j2_pt(int njet, RVec<int> jet_isgood, RVec<float> jet_pt){
   for (unsigned iPart = 0; iPart<jet_pt.size(); iPart++) {
     if (jet_isgood.at(iPart) == 0) continue;
     if (sublead == true) return jet_pt.at(iPart);
+    sublead = true;
+  }
+  return -999;
+}
+float get_j2_eta(int njet, RVec<int> jet_isgood, RVec<float> jet_eta){
+  if (njet<2) return -999;
+  bool sublead = false;
+  for (unsigned iPart = 0; iPart<jet_eta.size(); iPart++) {
+    if (jet_isgood.at(iPart) == 0) continue;
+    if (sublead == true) return jet_eta.at(iPart);
+    sublead = true;
+  }
+  return -999;
+}
+float get_j2_phi(int njet, RVec<int> jet_isgood, RVec<float> jet_phi){
+  if (njet<2) return -999;
+  bool sublead = false;
+  for (unsigned iPart = 0; iPart<jet_phi.size(); iPart++) {
+    if (jet_isgood.at(iPart) == 0) continue;
+    if (sublead == true) return jet_phi.at(iPart);
+    sublead = true;
+  }
+  return -999;
+}
+float get_j2_m(int njet, RVec<int> jet_isgood, RVec<float> jet_m){
+  if (njet<2) return -999;
+  bool sublead = false;
+  for (unsigned iPart = 0; iPart<jet_m.size(); iPart++) {
+    if (jet_isgood.at(iPart) == 0) continue;
+    if (sublead == true) return jet_m.at(iPart);
     sublead = true;
   }
   return -999;
@@ -744,6 +781,33 @@ float get_zeppenfeld_pt_system(RVec<float>jet_pt,RVec<float>jet_isgood,RVec<floa
   } else return -999;
 }
 
+float get_tru_leplep_m(RVec<float> mc_id, RVec<float> mc_status, RVec<float> mc_mom, RVec<float> mc_pt, RVec<float> mc_eta, RVec<float> mc_phi, RVec<float> mc_mass) {
+  float leplep_m = -999;
+  TLorentzVector lep_plus;
+  TLorentzVector lep_minus;
+  bool set_lep_plus = false;
+  bool set_lep_minus = false;
+  for (unsigned imc = 0; imc < mc_id.size(); ++imc) {
+    if (mc_id[imc]==23) {
+      leplep_m = mc_mass[imc];
+      break;
+    }
+    if (mc_status[imc]==23)  {
+      if (mc_id[imc]==11 || mc_id[imc]==13) {
+        lep_plus.SetPtEtaPhiM(mc_pt[imc],mc_eta[imc],mc_phi[imc],mc_mass[imc]);
+        set_lep_plus = true;
+      } else if (mc_id[imc]==-11 || mc_id[imc]==-13) {
+        lep_minus.SetPtEtaPhiM(mc_pt[imc],mc_eta[imc],mc_phi[imc],mc_mass[imc]);
+        set_lep_minus = true;
+      }
+    }
+    if (set_lep_plus && set_lep_minus) break;
+  }
+  if (leplep_m>-998) return leplep_m;
+  if (set_lep_minus && set_lep_plus) return (lep_plus+lep_minus).M();
+  return -999;
+}
+
 """)
 
 if __name__=='__main__':
@@ -774,29 +838,28 @@ if __name__=='__main__':
            ('j2_pt','j_pt(jet_pt,jet_isgood,1)'),
            ('jj_dphi','dijet_dphi'),
            ('jj_deta','dijet_deta'),
-           ('lly_dphi','llphoton_dphi[0]'),
            ('llyjj_dphi','llphoton_dijet_dphi[0]'),
-           ('llyjj_dr','get_Zyjj_dr(ll_pt, ll_eta, ll_phi, ll_m, photon_pt, photon_eta, photon_phi, dijet_pt, dijet_eta, dijet_phi, dijet_m)'),
            ('yjj_zep','photon_zeppenfeld[0]'),
            ('lly_ptthig19','llphoton_pTt2[0]'),
            ('lly_ptt', 'get_llg_ptt(photon_pt, photon_eta, photon_phi, llphoton_pt, llphoton_eta, llphoton_phi, ll_pt, ll_eta, ll_phi,llphoton_pTt2)'),
            ('llyjj_ptbal','llphoton_dijet_balance[0]'),
-           ('jj_m','dijet_m'),
            ('yj1_dr','get_deltaR_photon_j1(jet_isgood,jet_pt,jet_eta,jet_phi,photon_eta,photon_phi)'),
            ('yj2_dr','get_deltaR_photon_j2(jet_isgood,jet_pt,jet_eta,jet_phi,photon_eta,photon_phi)'),
+
+           # Alternative mva variables
+           ('jj_m','dijet_m'),
            ('llyj_detamin','get_min_deta_llphoton_j(jet_isgood,jet_eta,llphoton_eta)'),
            ('llyj_dphimin','get_min_dphi_llphoton_j(jet_isgood,jet_phi,llphoton_phi)'),
            ('llyjj_zep','get_zeppenfeld_system(jet_eta,jet_isgood,llphoton_eta)'),
            ('llyjj_zeppt','get_zeppenfeld_system(jet_pt,jet_isgood,llphoton_pt)'),
-
-           # event filters
-           ('trigger','get_trigger(ll_lepid,nel,el_sig,el_pt,HLT_Ele27_WPTight_Gsf,HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ,HLT_Ele32_WPTight_Gsf_L1DoubleEG,HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL,HLT_Ele32_WPTight_Gsf,HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL,nmu,mu_sig,mu_pt,HLT_IsoMu24 || HLT_IsoTkMu24,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ || HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL || HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,HLT_IsoMu27,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8,HLT_IsoMu24,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8, year)'),
-           ('pass_filter', 'pass_goodv&&pass_cschalo_tight&&pass_hbhe&&pass_hbheiso&&pass_ecaldeadcell&&pass_badpfmu&&pass_badpfmudz&&pass_hfnoisyhits&&pass_eebadsc&&pass_badcalib'),
-
-           #MISC. VARIABLES
-           ('lly_m','llphoton_m[0]'),
+           ('yj_drmin','photon_jet_mindr[0]'),
            ('l1_pt','get_l1_pt(el_pt,mu_pt,ll_lepid,ll_i1,ll_i2)'),
            ('l2_pt','get_l2_pt(el_pt,mu_pt,ll_lepid,ll_i1,ll_i2)'),
+           ('j1_eta','get_j1_eta(njet,jet_isgood,jet_eta)'),
+           ('j2_eta','get_j2_eta(njet,jet_isgood,jet_eta)'),
+
+           # Misc. variables
+           ('lly_m','llphoton_m[0]'),
            ('l1_phi','get_l1_phi(el_pt,el_phi,mu_pt,mu_phi,ll_lepid,ll_i1,ll_i2)'),
            ('l2_phi','get_l2_phi(el_pt,el_phi,mu_pt,mu_phi,ll_lepid,ll_i1,ll_i2)'),
            ('y_phi','photon_phi[0]'),     
@@ -809,23 +872,40 @@ if __name__=='__main__':
            ('lly_pt','llphoton_pt[0]'),
            ('lly_eta','llphoton_eta[0]'),
            ('lly_phi','llphoton_phi[0]'),
-           ('yj_drmin','photon_jet_mindr[0]'),
-           ('yj_drmax','drmax_yj(mc_pt,mc_eta,mc_phi,mc_mass,mc_id,mc_momidx,jet_pt,jet_eta,jet_phi,jet_m,jet_isgood,photon_eta,photon_phi)'),
+           ('j1_phi','get_j1_phi(njet,jet_isgood,jet_phi)'),
+           ('j2_phi','get_j2_phi(njet,jet_isgood,jet_phi)'),
+           ('j1_m','get_j1_m(njet,jet_isgood,jet_m)'),
+           ('j2_m','get_j2_m(njet,jet_isgood,jet_m)'),
+           ('tm_jets','truth_matched_bool(mc_pt,mc_eta,mc_phi,mc_mass,mc_id,mc_momidx,jet_pt,jet_eta,jet_phi,jet_m,jet_isgood)'),
+           ('tru_leplep_m', 'get_tru_leplep_m(mc_id,mc_status,mc_mom,mc_pt,mc_eta,mc_phi,mc_mass)'),
+
+           # Event variables
+           ('event_number','event'),
+           ('trigger','get_trigger(ll_lepid,nel,el_sig,el_pt,HLT_Ele27_WPTight_Gsf,HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ,HLT_Ele32_WPTight_Gsf_L1DoubleEG,HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL,HLT_Ele32_WPTight_Gsf,HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL,nmu,mu_sig,mu_pt,HLT_IsoMu24 || HLT_IsoTkMu24,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ || HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL || HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,HLT_IsoMu27,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8,HLT_IsoMu24,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8, year)'),
+           ('pass_filter', 'pass_goodv&&pass_cschalo_tight&&pass_hbhe&&pass_hbheiso&&pass_ecaldeadcell&&pass_badpfmu&&pass_badpfmudz&&pass_hfnoisyhits&&pass_eebadsc&&pass_badcalib'),
+
+           # Experimental variables
+           ('lly_dphi','llphoton_dphi[0]'),
+           ('llyjj_dr','get_Zyjj_dr(ll_pt, ll_eta, ll_phi, ll_m, photon_pt, photon_eta, photon_phi, dijet_pt, dijet_eta, dijet_phi, dijet_m)'),
            ('jj_dr','dr_jj(mc_pt,mc_eta,mc_phi,mc_mass,mc_id,mc_momidx,jet_pt,jet_eta,jet_phi,jet_m,jet_isgood)'),
            ('l1j_drmin','drmin_l1j(ll_lepid,el_eta,el_phi,mu_eta,mu_phi,jet_eta,jet_phi)'),
            ('l2j_drmin','drmin_l2j(ll_lepid,el_eta,el_phi,mu_eta,mu_phi,jet_eta,jet_phi)'),
-           ('tm_jets','truth_matched_bool(mc_pt,mc_eta,mc_phi,mc_mass,mc_id,mc_momidx,jet_pt,jet_eta,jet_phi,jet_m,jet_isgood)'),
-           ('event_number','event'),
+           ('yj_drmax','drmax_yj(mc_pt,mc_eta,mc_phi,mc_mass,mc_id,mc_momidx,jet_pt,jet_eta,jet_phi,jet_m,jet_isgood,photon_eta,photon_phi)'),
            ]
   
-  branches = ['y_mva','yl_drmin','yl_drmax','pt_mass','cosTheta','costheta', 'phi','y_res','y_eta','y_pt','l1_eta','l2_eta']
-  branches.extend(['yj1_dr','yj2_dr','llyj_detamin','llyj_dphimin','llyjj_zep','llyjj_zeppt'])
-  branches.extend(['j1_pt','j2_pt','jj_dphi','jj_deta','llyjj_dphi','yjj_zep','lly_ptthig19','lly_ptt'])
-  branches.extend(['llyjj_ptbal','jj_m'])
-  branches.extend(['lly_m','l1_pt','l2_pt','l1_phi','l2_phi','y_phi'])
+  # Kinematic bdt variables
+  branches = ['y_mva','yl_drmin','yl_drmax','pt_mass','cosTheta','costheta', 'phi','y_res','y_eta','y_pt','y_pt_deco','l1_eta','l2_eta']
+  # Dijet bdt variables
+  branches.extend(['j1_pt','j2_pt','jj_dphi','jj_deta','llyjj_dphi','yjj_zep','lly_ptthig19','lly_ptt','llyjj_ptbal','yj1_dr','yj2_dr'])
+  # Alternative mva variables
+  branches.extend(['jj_m','llyj_detamin','llyj_dphimin','llyjj_zep','llyjj_zeppt','yj_drmin','l1_pt','l2_pt','j1_eta','j2_eta','njet'])
+  # Misc. variables
+  branches.extend(['lly_m','l1_phi','l2_phi','y_phi'])
   branches.extend(['leplep_pt','leplep_eta','leplep_phi','leplep_m','leplep_flavor','leplep_charge'])
   branches.extend(['lly_pt','lly_eta','lly_phi'])
-  branches.extend(['yj_drmin','njet'])
+  branches.extend(['j1_phi','j2_phi','j1_m','j2_m'])
+  branches.extend(['tm_jets','tru_leplep_m'])
+  # Event variables
   branches.extend(['year', 'luminosity', 'w_lumiXyear', 'weightXyear', 'type', 'pass_filter','event_number'])
   #branches.extend(['lly_dphi','llyjj_dr','yj_drmax','jj_dr','l1j_drmin','l2j_drmin']) # Unvarified variables
   #           ('kinMVA','getMVA(photon_mva,min_dR,max_dR,pt_mass,cosTheta,costheta,phi,photon_res,photon_prap,l1_rapidity,l2_rapidity)'),
