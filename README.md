@@ -8,7 +8,8 @@
 2. Produce ntuples from picos
   - ggf_ntuple_producer.py
   - vbf_ntuple_producer.py
-TODO 3. Make training and testing ntuples
+3. Make training, validation, and testing ntuples
+  - ggf_mva_ntuple_producer.py
 
 # Procedure for making BDTs:
 1. Make ntuples using procedure above
