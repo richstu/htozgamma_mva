@@ -781,33 +781,6 @@ float get_zeppenfeld_pt_system(RVec<float>jet_pt,RVec<float>jet_isgood,RVec<floa
   } else return -999;
 }
 
-float get_tru_leplep_m(RVec<float> mc_id, RVec<float> mc_status, RVec<float> mc_mom, RVec<float> mc_pt, RVec<float> mc_eta, RVec<float> mc_phi, RVec<float> mc_mass) {
-  float leplep_m = -999;
-  TLorentzVector lep_plus;
-  TLorentzVector lep_minus;
-  bool set_lep_plus = false;
-  bool set_lep_minus = false;
-  for (unsigned imc = 0; imc < mc_id.size(); ++imc) {
-    if (mc_id[imc]==23) {
-      leplep_m = mc_mass[imc];
-      break;
-    }
-    if (mc_status[imc]==23)  {
-      if (mc_id[imc]==11 || mc_id[imc]==13) {
-        lep_plus.SetPtEtaPhiM(mc_pt[imc],mc_eta[imc],mc_phi[imc],mc_mass[imc]);
-        set_lep_plus = true;
-      } else if (mc_id[imc]==-11 || mc_id[imc]==-13) {
-        lep_minus.SetPtEtaPhiM(mc_pt[imc],mc_eta[imc],mc_phi[imc],mc_mass[imc]);
-        set_lep_minus = true;
-      }
-    }
-    if (set_lep_plus && set_lep_minus) break;
-  }
-  if (leplep_m>-998) return leplep_m;
-  if (set_lep_minus && set_lep_plus) return (lep_plus+lep_minus).M();
-  return -999;
-}
-
 """)
 
 if __name__=='__main__':
@@ -907,7 +880,8 @@ if __name__=='__main__':
   branches.extend(['tm_jets','tru_leplep_m'])
   # Event variables
   branches.extend(['year', 'luminosity', 'w_lumiXyear', 'weightXyear', 'type', 'pass_filter','event_number'])
-  #branches.extend(['lly_dphi','llyjj_dr','yj_drmax','jj_dr','l1j_drmin','l2j_drmin']) # Unvarified variables
+  ## Experimental variables
+  #branches.extend(['lly_dphi','llyjj_dr','yj_drmax','jj_dr','l1j_drmin','l2j_drmin'])
   #           ('kinMVA','getMVA(photon_mva,min_dR,max_dR,pt_mass,cosTheta,costheta,phi,photon_res,photon_prap,l1_rapidity,l2_rapidity)'),
 
   #make n-tuples
