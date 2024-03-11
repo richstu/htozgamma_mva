@@ -1,6 +1,6 @@
 # HToZGamma MVA ReadMe
 
-# Install python environment for gpu training (Optional. For only cms37)
+# (Optional) Install python environment for gpu training (For only cms37)
 source set_env.sh.gpu
 python3 -m venv py-env
 source py-env/bin/activate
