@@ -2,6 +2,7 @@
 import uproot
 import numpy as np
 import os
+import time
 
 def combine_ntuples(class_filenames):
   # Get input ntuples
@@ -123,6 +124,7 @@ def split_ntuple(ntuple, branches, uproot_cut, weight_branch_names, output_filen
   in_file.close()
 
 if __name__ == '__main__':
+  start_time = time.time()
 
   np.random.seed(1)
 
@@ -137,3 +139,5 @@ if __name__ == '__main__':
   # Split sample into training, validation, and testing tree using event number. ([0,3,6,9]=training,[1,4,7]=validation,[2,5,8]=testing)
   split_ntuple(ntuple, branches, uproot_cut='(lly_m>120) & (lly_m<130)', weight_branch_names=['weightXyear','w_lumiXyear'], output_filename='ntuples/ggf_mva_ntuples.root')
 
+  elapsed_time = time.time() - start_time
+  print(f'Elapsed time: {elapsed_time}')

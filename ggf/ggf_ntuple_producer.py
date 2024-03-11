@@ -3,6 +3,7 @@
 Function that generates n-tuples for MVA training
 '''
 import ROOT
+import time
 
 def write_ntuples(filenames, cuts, out_name, defines=[], tree_name='tree', branches=()):
   '''Generate ROOT n-tuple from existing n-tuple
@@ -315,6 +316,7 @@ float get_tru_leplep_m(RVec<float> mc_id, RVec<float> mc_status, RVec<float> mc_
 
 if __name__=='__main__':
   #ROOT.EnableImplicitMT() # Turn off to keep ntuple event sequence
+  start_time = time.time()
  
   years = ["2016APV","2016","2017","2018"]
   #years = ["2017"]
@@ -333,7 +335,7 @@ if __name__=='__main__':
        ('y_res','photon_energyErr[0]/photon_pt[0]'),
        ('y_eta','photon_eta[0]'),
        ('y_pt','photon_pt[0]'),     
-       ('y_pt_deco','photon_pt[0]/llphoton_m[0]'),      
+       ('y_ptdeco','photon_pt[0]/llphoton_m[0]'),      
        ('l1_eta','get_l1_eta(el_pt,el_eta,mu_pt,mu_eta,ll_lepid,ll_i1,ll_i2)'),
        ('l2_eta','get_l2_eta(el_pt,el_eta,mu_pt,mu_eta,ll_lepid,ll_i1,ll_i2)'),
 
@@ -365,7 +367,7 @@ if __name__=='__main__':
        ('event_number','event'),
        ]
  
-  branches = ['y_mva','yl_drmin','yl_drmax','pt_mass','cosTheta','costheta','Ht','phi','y_res','y_eta','y_pt','y_pt_deco','l1_eta','l2_eta']
+  branches = ['y_mva','yl_drmin','yl_drmax','pt_mass','cosTheta','costheta','Ht','phi','y_res','y_eta','y_pt','y_ptdeco','l1_eta','l2_eta']
   branches.extend(['lly_m','l1_pt','l2_pt','l1_phi','l2_phi','y_phi'])
   branches.extend(['leplep_pt','leplep_eta','leplep_phi','leplep_m','leplep_flavor'])
   branches.extend(['lly_pt','lly_eta','lly_phi','lly_ptt'])
@@ -400,15 +402,5 @@ if __name__=='__main__':
     write_ntuples([base_dir + year + pico_type  + bkg for year in years],  cuts,
              (names + '_' + dataset_name + '_' + ''.join(years) + '.root'),  defines,  'tree',  branches)
 
-
-  ##write_ntuples(filenames, cuts, out_name, defines=[], tree_name='tree', branches=())
-  ##Make signal ntuples
-  #write_ntuples([base_dir + year + pico_type + sig for sig in sig_samples for year in years],  cuts,  
-  #         (names + '_sig_' + ''.join(years) + '.root'),  defines,  'tree',  branches)
-
-  ##Make bkg ntuples               
-  #write_ntuples([base_dir + year + pico_type  + bkg for bkg in bkg_samples for year in years],  cuts,
-  #         (names + '_bkg_' + ''.join(years) + '.root'),  defines,  'tree',  branches)
-
-
-
+  elapsed_time = time.time() - start_time
+  print(f'Elapsed time: {elapsed_time}')

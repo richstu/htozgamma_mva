@@ -1,16 +1,33 @@
 # HToZGamma MVA ReadMe
 
+# Install python environment for gpu training (Optional. For only cms37)
+source set_env.sh.gpu
+python3 -m venv py-env
+source py-env/bin/activate
+pip3 install --upgrade pip
+pip3 install torch torchvision torchaudio
+pip3 install uproot numpy scikit-learn matplotlib
+pip3 install jupyterlab xgboost slugify tensorboard shap
+
+# Setup python environment
+- For cms11
+```source set_env.sh```
+- For cms37 (GPU training)
+```source set_env.sh.gpu
+source py-env/bin/activate```
+
 # Setup folders
 1. Run ```folder_setup.sh``` to make empty folders
 
 # Producing ntuples:
-1. Setup environment: ```source set_env.sh```
-2. Produce ntuples from picos
+1. Produce ntuples from picos. 
   - ggf_ntuple_producer.py
   - vbf_ntuple_producer.py
-3. Make training, validation, and testing ntuples
+2. Make training, validation, and testing ntuples. Apply cut for training.
   - ggf_mva_ntuple_producer.py
 
 # Procedure for making BDTs:
-1. Make ntuples using procedure above
-TODO 2. run the BDT producer file with root (e.g. root ggF_BDT_producer.C)
+1. Run the BDT producer
+   - ggf_train_tmva_hig19014.py
+
+# Procedure for measuring performance of MVAs
