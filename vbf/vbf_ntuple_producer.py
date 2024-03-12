@@ -3,6 +3,7 @@
 Function that generates n-tuples for MVA training
 '''
 import ROOT
+import time
 ROOT.ROOT.EnableImplicitMT(0)
 def write_ntuples(filenames, cuts, out_name, defines=[], tree_name='tree', branches=()):
   '''Generate ROOT n-tuple from existing n-tuple
@@ -757,6 +758,8 @@ float get_zeppenfeld_system(RVec<float>jet_eta,RVec<float>jet_isgood,RVec<float>
   }
   if (sublead_eta > -999) {
     double zeppenfeld = (llphoton_eta.at(0) - (lead_eta + sublead_eta)/2)/fabs(lead_eta - sublead_eta);
+    if (zeppenfeld>30) zeppenfeld = 30;
+    else if (zeppenfeld<-30) zeppenfeld = 30;
     return zeppenfeld;
   } else return -999;
 }
@@ -777,6 +780,8 @@ float get_zeppenfeld_pt_system(RVec<float>jet_pt,RVec<float>jet_isgood,RVec<floa
   }
   if (sublead_pt > -999) {
     double pt_balance = (llphoton_pt.at(0) - (lead_pt + sublead_pt)/2)/fabs(lead_pt - sublead_pt);
+    if (pt_balance>30) pt_balance = 30;
+    else if (pt_balance<-30) pt_balance = 30;
     return pt_balance;
   } else return -999;
 }
@@ -784,6 +789,8 @@ float get_zeppenfeld_pt_system(RVec<float>jet_pt,RVec<float>jet_isgood,RVec<floa
 """)
 
 if __name__=='__main__':
+  start_time = time.time()
+
   #ROOT.EnableImplicitMT() # Turn off to keep ntuple event sequence
 
   years = ["2016APV","2016","2017","2018"]
@@ -795,14 +802,14 @@ if __name__=='__main__':
            ('y_mva','photon_idmva[0]'),
            ('yl_drmin','photon_drmin[0]'),
            ('yl_drmax','get_max_dr(photon_eta,photon_phi,el_eta,el_phi,mu_eta,mu_phi,ll_lepid,ll_i1,ll_i2)'),
-           ('pt_mass','llphoton_pt[0]/llphoton_m[0]'),
+           ('lly_ptmass','llphoton_pt[0]/llphoton_m[0]'),
            ('cosTheta','llphoton_cosTheta[0]'),
            ('costheta','llphoton_costheta[0]'),
            ('phi','llphoton_psi[0]'),
            ('y_res','photon_energyErr[0]/photon_pt[0]'),
            ('y_eta','photon_eta[0]'),
            ('y_pt','photon_pt[0]'),      
-           ('y_pt_deco','photon_pt[0]/llphoton_m[0]'),      
+           ('y_ptmass','photon_pt[0]/llphoton_m[0]'),      
            ('l1_eta','get_l1_eta(el_pt,el_eta,mu_pt,mu_eta,ll_lepid,ll_i1,ll_i2)'),
            ('l2_eta','get_l2_eta(el_pt,el_eta,mu_pt,mu_eta,ll_lepid,ll_i1,ll_i2)'),
 
@@ -824,7 +831,7 @@ if __name__=='__main__':
            ('llyj_detamin','get_min_deta_llphoton_j(jet_isgood,jet_eta,llphoton_eta)'),
            ('llyj_dphimin','get_min_dphi_llphoton_j(jet_isgood,jet_phi,llphoton_phi)'),
            ('llyjj_zep','get_zeppenfeld_system(jet_eta,jet_isgood,llphoton_eta)'),
-           ('llyjj_zeppt','get_zeppenfeld_system(jet_pt,jet_isgood,llphoton_pt)'),
+           ('llyjj_zeppt','get_zeppenfeld_pt_system(jet_pt,jet_isgood,llphoton_pt)'),
            ('yj_drmin','photon_jet_mindr[0]'),
            ('l1_pt','get_l1_pt(el_pt,mu_pt,ll_lepid,ll_i1,ll_i2)'),
            ('l2_pt','get_l2_pt(el_pt,mu_pt,ll_lepid,ll_i1,ll_i2)'),
@@ -867,7 +874,7 @@ if __name__=='__main__':
            ]
   
   # Kinematic bdt variables
-  branches = ['y_mva','yl_drmin','yl_drmax','pt_mass','cosTheta','costheta', 'phi','y_res','y_eta','y_pt','y_pt_deco','l1_eta','l2_eta']
+  branches = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta', 'phi','y_res','y_eta','y_pt','y_ptmass','l1_eta','l2_eta']
   # Dijet bdt variables
   branches.extend(['j1_pt','j2_pt','jj_dphi','jj_deta','llyjj_dphi','yjj_zep','lly_ptthig19','lly_ptt','llyjj_ptbal','yj1_dr','yj2_dr'])
   # Alternative mva variables
@@ -890,13 +897,11 @@ if __name__=='__main__':
       '(ll_m[0]>80 && ll_m[0]<100)', '(llphoton_m[0]+ll_m[0]>185)',
       'lly_m>100 && lly_m<180', 'njet>=2&&jj_m>0.0&&nlep==2&&nbdfm==0']
 
-  names = 'VBF_ntuples' # notm'
+  names = 'vbf_ntuples'
   base_dir  = '/net/cms11/cms11r0/pico/NanoAODv9/htozgamma_kingscanyon_v1/'
   pico_type = '/mc/merged_zgmc_llg/'
-  #sig_samples = ['*GluGlu*HToZG*125_*.root','*VBF*HToZG*125_*.root']
-  #bkg_samples = ['*ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*ZGamma2JToGamma2L2J_EWK*.root']
   sig_samples = ['*GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root','*VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root']                              
-  bkg_samples = ['*ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8*.root','*ZGamma2JToGamma2L2J_EWK*.root']
+  bkg_samples = ['*ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8*.root','*ZGamma2JToGamma2L2J_EWK_MLL-50_MJJ-120_TuneCP5_13TeV-madgraph-pythia8*.root']
   print([base_dir + year + pico_type + sig for sig in sig_samples for year in years])
   print([base_dir + year + pico_type  + bkg for bkg in bkg_samples for year in years])
 
@@ -911,6 +916,9 @@ if __name__=='__main__':
     dataset_name=bkg.replace('*','').replace('.root','')
     write_ntuples([base_dir + year + pico_type  + bkg for year in years],  cuts,
              (names + '_' + dataset_name + '_' + ''.join(years) + '.root'),  defines,  'tree',  branches)
+
+  elapsed_time = time.time() - start_time
+  print(f'Elapsed time: {elapsed_time}')
 
 #List of potential samples to use
 #DYJetsToLL EWKZ2Jets GluGluHToGG GluGluHToTauTau GluGluHToWW GluGluHToZZ TGJets_TuneCP5 TTGJets TTTo2L2Nu W ZG ZZ 

@@ -19,7 +19,6 @@ def train_bdt(model_folder, train_filename, test_filename, tmva_filename):
   dataloader.AddVariable("y_mva",'F')
   dataloader.AddVariable("yl_drmin",'F')
   dataloader.AddVariable("yl_drmax",'F')
-  dataloader.AddVariable("lly_ptmass",'F')
   dataloader.AddVariable("cosTheta",'F')
   dataloader.AddVariable("costheta",'F')
   dataloader.AddVariable("phi",'F')
@@ -27,22 +26,32 @@ def train_bdt(model_folder, train_filename, test_filename, tmva_filename):
   dataloader.AddVariable("y_eta",'F')
   dataloader.AddVariable("l1_eta",'F')
   dataloader.AddVariable("l2_eta",'F')
+  dataloader.AddVariable("lly_ptt",'F')
+  dataloader.AddVariable("jj_deta",'F')
+  dataloader.AddVariable("jj_dphi",'F')
+  dataloader.AddVariable("yj1_dr",'F')
+  dataloader.AddVariable("yj2_dr",'F')
+  dataloader.AddVariable("llyjj_dphi",'F')
+  dataloader.AddVariable("j1_pt",'F')
+  dataloader.AddVariable("j2_pt",'F')
+  dataloader.AddVariable("llyjj_ptbal",'F')
+  dataloader.AddVariable("yjj_zep",'F')
   dataloader.SetBackgroundWeightExpression("weightXyear")
   dataloader.SetSignalWeightExpression("weightXyear")
   dataloader.AddSpectator("lly_m", 'F')
   dataloader.AddSpectator("weightXyear", 'F')
 
   # Add data.
-  train_chain = TChain('train_tree')
+  train_chain = TChain('train_tree_nocut')
   train_chain.Add(train_filename)
-  test_chain = TChain('eval_tree')
+  test_chain = TChain('eval_tree_nocut')
   test_chain.Add(test_filename)
   dataloader.AddTree(train_chain, 'Background', 1., 'classID==0', TMVA.Types.kTraining)
   dataloader.AddTree(train_chain, 'Signal', 1., 'classID==1', TMVA.Types.kTraining)
   dataloader.AddTree(test_chain, 'Background', 1., 'classID==0', TMVA.Types.kTesting)
   dataloader.AddTree(test_chain, 'Signal', 1., 'classID==1', TMVA.Types.kTesting)
-  cut_s = TCut('lly_m>120 && lly_m < 130');
-  cut_b = TCut('lly_m>120 && lly_m < 130');
+  cut_s = TCut('1');
+  cut_b = TCut('1');
   dataloader.PrepareTrainingAndTestTree(cut_s,cut_b,f"NormMode=NumEvents:ScaleWithPreselEff:!V");
 
   factory.BookMethod(dataloader,TMVA.Types.kBDT,"BDT","!H:!V:NTrees=850:MinNodeSize=2.5%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20");
@@ -54,7 +63,7 @@ def train_bdt(model_folder, train_filename, test_filename, tmva_filename):
 if __name__ == "__main__":
   start_time = time.time()
 
-  input_mva_ntuple = 'ntuples/ggf_mva_ntuples.root'
+  input_mva_ntuple = 'ntuples/vbf_mva_ntuples.root'
   bdt_name = 'tmva_bdt_hig19014'
   output_model_folder = f'{bdt_name}_model' # Can't be a subfolder
   output_mva_results = f'mva_output/{bdt_name}_factory_results.root'

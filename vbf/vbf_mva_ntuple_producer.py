@@ -59,7 +59,7 @@ def split_ntuple(ntuple, branches, uproot_cut, weight_branch_names, output_filen
   test_ntuples = np.stack([np.squeeze(test_ntuple[feat]) for feat in branches], axis=1)
   print(f'Total entries: {n_entries} train entries: {len(train_ntuples)}, eval entries: {len(eval_ntuples)}, test entries: {len(test_ntuples)}')
 
-  ## Split the ntuples
+  ## Split the ntuples (Alternative method)
   #stack_ntuple = np.stack([np.squeeze(ntuple[feat]) for feat in branches], axis=1)
   #n_entries = len(stack_ntuple)
   #train_n_entries = int(train_fraction * n_entries)
@@ -134,14 +134,16 @@ if __name__ == '__main__':
 
   # Combine signal and background samples into one ntuple AND mix up signal and background event sequence.
   class_filenames = [
-               [1,'ntuples/ggf_ntuples_GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_2016APV201620172018.root'],
-               [0,'ntuples/ggf_ntuples_ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018.root'],
-               [0,'ntuples/ggf_ntuples_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018.root']
+               [1,'ntuples/vbf_ntuples_GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_2016APV201620172018.root'],
+               [1,'ntuples/vbf_ntuples_VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_2016APV201620172018.root'],
+               [0,'ntuples/vbf_ntuples_ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018.root'],
+               [0,'ntuples/vbf_ntuples_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018.root'],
+               [0,'ntuples/vbf_ntuples_ZGamma2JToGamma2L2J_EWK_MLL-50_MJJ-120_TuneCP5_13TeV-madgraph-pythia8_2016APV201620172018.root']
                ]
   ntuple, branches = combine_ntuples(class_filenames)
 
-  # Split sample into training, validation, and testing tree using event number. ([0,3,6,9]=training,[1,4,7]=validation,[2,5,8]=testing)
-  split_ntuple(ntuple, branches, uproot_cut='(lly_m>120) & (lly_m<130)', weight_branch_names=['weightXyear','w_lumiXyear'], output_filename='ntuples/ggf_mva_ntuples.root')
+  # Split sample into training, validation, and testing tree using event number. (event number % 3)
+  split_ntuple(ntuple, branches, uproot_cut='(lly_m>120) & (lly_m<130)', weight_branch_names=['weightXyear','w_lumiXyear'], output_filename='ntuples/vbf_mva_ntuples.root')
 
   elapsed_time = time.time() - start_time
-  print(f'Elapsed time: {elapsed_time}')
+  print(f'Elapsed time: {elapsed_time:.1f} sec')

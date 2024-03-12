@@ -31,3 +31,8 @@ source py-env/bin/activate```
    - ggf_train_tmva_hig19014.py
 
 # Procedure for measuring performance of MVAs
+TODO
+1. Measure significance
+2. Measure AUC
+3. Measure correlation with lly_m
+4. Measure overtraining

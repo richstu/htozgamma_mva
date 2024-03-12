@@ -327,15 +327,15 @@ if __name__=='__main__':
        ('y_mva','photon_idmva[0]'),
        ('yl_drmin','photon_drmin[0]'),
        ('yl_drmax','get_max_dr(photon_eta,photon_phi,el_eta,el_phi,mu_eta,mu_phi,ll_lepid,ll_i1,ll_i2)'),
-       ('Ht','H_t(photon_pt,photon_eta,photon_phi,el_pt,el_eta,el_phi,mu_pt,mu_eta,mu_phi,ll_lepid,ll_i1,ll_i2,jet_pt,jet_eta,jet_phi,jet_m)'),
-       ('pt_mass','llphoton_pt[0]/llphoton_m[0]'),
+       ('ht','H_t(photon_pt,photon_eta,photon_phi,el_pt,el_eta,el_phi,mu_pt,mu_eta,mu_phi,ll_lepid,ll_i1,ll_i2,jet_pt,jet_eta,jet_phi,jet_m)'),
+       ('lly_ptmass','llphoton_pt[0]/llphoton_m[0]'),
        ('cosTheta','llphoton_cosTheta[0]'),
        ('costheta','llphoton_costheta[0]'),
        ('phi','llphoton_psi[0]'),
        ('y_res','photon_energyErr[0]/photon_pt[0]'),
        ('y_eta','photon_eta[0]'),
        ('y_pt','photon_pt[0]'),     
-       ('y_ptdeco','photon_pt[0]/llphoton_m[0]'),      
+       ('y_ptmass','photon_pt[0]/llphoton_m[0]'),      
        ('l1_eta','get_l1_eta(el_pt,el_eta,mu_pt,mu_eta,ll_lepid,ll_i1,ll_i2)'),
        ('l2_eta','get_l2_eta(el_pt,el_eta,mu_pt,mu_eta,ll_lepid,ll_i1,ll_i2)'),
 
@@ -367,7 +367,7 @@ if __name__=='__main__':
        ('event_number','event'),
        ]
  
-  branches = ['y_mva','yl_drmin','yl_drmax','pt_mass','cosTheta','costheta','Ht','phi','y_res','y_eta','y_pt','y_ptdeco','l1_eta','l2_eta']
+  branches = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','ht','phi','y_res','y_eta','y_pt','y_ptmass','l1_eta','l2_eta']
   branches.extend(['lly_m','l1_pt','l2_pt','l1_phi','l2_phi','y_phi'])
   branches.extend(['leplep_pt','leplep_eta','leplep_phi','leplep_m','leplep_flavor'])
   branches.extend(['lly_pt','lly_eta','lly_phi','lly_ptt'])
@@ -382,7 +382,7 @@ if __name__=='__main__':
       'lly_m>100 && lly_m<180', 'njet<=1 && nlep<=2 && met<90']
     
 
-  names = 'ggF_ntuples'
+  names = 'ggf_ntuples'
   base_dir  = '/net/cms11/cms11r0/pico/NanoAODv9/htozgamma_kingscanyon_v1/'
   pico_type = '/mc/merged_zgmc_llg/'
   sig_samples = ['*GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root','*VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root']                              
