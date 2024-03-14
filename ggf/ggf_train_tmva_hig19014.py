@@ -69,7 +69,7 @@ if __name__ == "__main__":
 
   # Run trained bdt over full set
   infer_output_filename = f'mva_output/{bdt_name}_results.root'
-  command = f'root -q \'root_scripts/infer_tmva.C+("{input_mva_ntuple}", "train_tree_nocut", "eval_tree_nocut", "test_tree_nocut", "BDT", "{output_model_folder}/weights/TMVAClassification_BDT.weights.xml", "{infer_output_filename}")\''
+  command = f'root -q \'root_scripts/infer_tmva.C+("{input_mva_ntuple}", "train_tree_baseline", "eval_tree_baseline", "test_tree_baseline", "BDT", "{output_model_folder}/weights/TMVAClassification_BDT.weights.xml", "{infer_output_filename}")\''
   print(command)
   os.system(command)
 
