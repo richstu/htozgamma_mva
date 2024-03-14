@@ -885,6 +885,7 @@ if __name__=='__main__':
   branches.extend(['lly_pt','lly_eta','lly_phi'])
   branches.extend(['j1_phi','j2_phi','j1_m','j2_m'])
   branches.extend(['tm_jets','tru_leplep_m'])
+  branches.extend(['nlep','nbdfm'])
   # Event variables
   branches.extend(['year', 'luminosity', 'w_lumiXyear', 'weightXyear', 'type', 'pass_filter','event_number'])
   ## Experimental variables
@@ -893,9 +894,7 @@ if __name__=='__main__':
 
   #make n-tuples
   cuts = ['trigger', 'pass_filter', 'llphoton_m.size()>0 && photon_pt.size()>0',
-      'use_event', '(photon_id80[0])&&(photon_pt[0]/lly_m>15.0/110.0)',
-      '(ll_m[0]>80 && ll_m[0]<100)', '(llphoton_m[0]+ll_m[0]>185)',
-      'lly_m>100 && lly_m<180', 'njet>=2&&jj_m>0.0&&nlep==2&&nbdfm==0']
+          'use_event', 'leplep_m>50', 'njet>=2']
 
   names = 'vbf_ntuples'
   base_dir  = '/net/cms11/cms11r0/pico/NanoAODv9/htozgamma_kingscanyon_v1/'

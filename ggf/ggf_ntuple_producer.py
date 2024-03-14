@@ -350,6 +350,7 @@ if __name__=='__main__':
        ('l1_phi','get_l1_phi(el_pt,el_phi,mu_pt,mu_phi,ll_lepid,ll_i1,ll_i2)'),
        ('l2_phi','get_l2_phi(el_pt,el_phi,mu_pt,mu_phi,ll_lepid,ll_i1,ll_i2)'),
        ('y_phi','photon_phi[0]'),     
+       ('y_id80', 'photon_id80[0]'),
        ('leplep_pt', 'll_pt[0]'),
        ('leplep_eta', 'll_eta[0]'),
        ('leplep_phi', 'll_phi[0]'),
@@ -368,18 +369,16 @@ if __name__=='__main__':
        ]
  
   branches = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','ht','phi','y_res','y_eta','y_pt','y_ptmass','l1_eta','l2_eta']
-  branches.extend(['lly_m','l1_pt','l2_pt','l1_phi','l2_phi','y_phi'])
+  branches.extend(['lly_m','l1_pt','l2_pt','l1_phi','l2_phi','y_phi','y_id80'])
   branches.extend(['leplep_pt','leplep_eta','leplep_phi','leplep_m','leplep_flavor'])
   branches.extend(['lly_pt','lly_eta','lly_phi','lly_ptt'])
-  branches.extend(['met','j1_pt','j1_eta','j1_phi'])
+  branches.extend(['met','j1_pt','j1_eta','j1_phi', 'njet', 'nlep'])
   branches.extend(['tru_leplep_m'])
-  branches.extend(['year', 'luminosity', 'w_lumiXyear', 'weightXyear', 'type', 'pass_filter','event_number'])
+  branches.extend(['year', 'luminosity', 'w_lumiXyear', 'weightXyear', 'type', 'pass_filter','event_number', 'trigger'])
 
   #make n-tuples
   cuts = ['trigger', 'pass_filter', 'llphoton_m.size()>0 && photon_pt.size()>0',
-      'use_event', '(photon_id80[0])&&(photon_pt[0]/lly_m>15.0/110.0)',
-      '(ll_m[0]>80 && ll_m[0]<100)', '(llphoton_m[0]+ll_m[0]>185)',
-      'lly_m>100 && lly_m<180', 'njet<=1 && nlep<=2 && met<90']
+          'use_event', 'leplep_m>50']
     
 
   names = 'ggf_ntuples'

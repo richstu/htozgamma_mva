@@ -39,11 +39,7 @@ def combine_ntuples(class_filenames):
 
   return output_ntuple, output_branches
 
-def split_ntuple(ntuple, branches, uproot_cut, weight_branch_names, output_filename):
-  train_fraction = 0.34
-  eval_fraction = 0.33
-  test_fraction = 1 - train_fraction - eval_fraction
-
+def split_ntuple(ntuple, branches, baseline_cut, train_cut, weight_branch_names, output_filename):
   # Split ntuple into trees using event number
   train_ntuple, eval_ntuple, test_ntuple = {}, {}, {}
   train_idx = (ntuple['event_number']%3==0) 
@@ -57,9 +53,17 @@ def split_ntuple(ntuple, branches, uproot_cut, weight_branch_names, output_filen
   train_ntuples = np.stack([np.squeeze(train_ntuple[feat]) for feat in branches], axis=1)
   eval_ntuples = np.stack([np.squeeze(eval_ntuple[feat]) for feat in branches], axis=1)
   test_ntuples = np.stack([np.squeeze(test_ntuple[feat]) for feat in branches], axis=1)
-  print(f'Total entries: {n_entries} train entries: {len(train_ntuples)}, eval entries: {len(eval_ntuples)}, test entries: {len(test_ntuples)}')
 
-  ## Split the ntuples
+  train_fraction = len(train_ntuples)*1./n_entries
+  eval_fraction = len(eval_ntuples)*1./n_entries
+  test_fraction = len(test_ntuples)*1./n_entries
+  print(f'Total entries: {n_entries} train entries: {len(train_ntuples)}, eval entries: {len(eval_ntuples)}, test entries: {len(test_ntuples)}')
+  print(f'  train fraction: {train_fraction:.2f}, val. fraction:{eval_fraction:.2f}, test fraction:{test_fraction:.2f}')
+
+  ## Split the ntuples (Alternative method)
+  #train_fraction = 0.34
+  #eval_fraction = 0.33
+  #test_fraction = 1 - train_fraction - eval_fraction
   #stack_ntuple = np.stack([np.squeeze(ntuple[feat]) for feat in branches], axis=1)
   #n_entries = len(stack_ntuple)
   #train_n_entries = int(train_fraction * n_entries)
@@ -92,38 +96,35 @@ def split_ntuple(ntuple, branches, uproot_cut, weight_branch_names, output_filen
       out_test_ntuples[branch] = np.float32(test_ntuples[:,ibranch])
   tmp_filename = f'{output_filename}.tmp'
   with uproot.recreate(tmp_filename) as output_file:
-    output_file["train_tree_nocut"] = out_train_ntuples
-    output_file["test_tree_nocut"] = out_test_ntuples
-    output_file["eval_tree_nocut"] = out_eval_ntuples
+    output_file["train_tree_baseline"] = out_train_ntuples
+    output_file["test_tree_baseline"] = out_test_ntuples
+    output_file["eval_tree_baseline"] = out_eval_ntuples
   print('Temporary saved trees to '+tmp_filename)
 
   # Apply cut using uproot
   in_file = uproot.open(tmp_filename)
 
-  train_full_tree = in_file['train_tree_nocut']
-  train_full_ntuples = train_full_tree.arrays(branches, library='np')
-  if uproot_cut == '1': train_ntuples = train_full_tree.arrays(branches, library='np')
-  else: train_ntuples = train_full_tree.arrays(branches, uproot_cut, library='np')
+  train_full_tree = in_file['train_tree_baseline']
+  train_full_ntuples = train_full_tree.arrays(branches, baseline_cut, library='np')
+  train_ntuples = train_full_tree.arrays(branches, train_cut, library='np')
 
-  test_full_tree = in_file['test_tree_nocut']
-  test_full_ntuples = test_full_tree.arrays(branches, library='np')
-  if uproot_cut == '1': test_ntuples = test_full_tree.arrays(branches, library='np')
-  else: test_ntuples = test_full_tree.arrays(branches, uproot_cut, library='np')
+  test_full_tree = in_file['test_tree_baseline']
+  test_full_ntuples = test_full_tree.arrays(branches, baseline_cut, library='np')
+  test_ntuples = test_full_tree.arrays(branches, train_cut, library='np')
 
-  eval_full_tree = in_file['eval_tree_nocut']
-  eval_full_ntuples = eval_full_tree.arrays(branches, library='np')
-  if uproot_cut == '1': eval_ntuples = eval_full_tree.arrays(branches, library='np')
-  else: eval_ntuples = eval_full_tree.arrays(branches, uproot_cut, library='np')
+  eval_full_tree = in_file['eval_tree_baseline']
+  eval_full_ntuples = eval_full_tree.arrays(branches, baseline_cut, library='np')
+  eval_ntuples = eval_full_tree.arrays(branches, train_cut, library='np')
 
   #print(f'train_full: {train_full_ntuples}')
   #print(f'train: {train_ntuples}')
   with uproot.recreate(output_filename) as output_file:
     output_file["train_tree"] = train_ntuples
-    output_file["train_tree_nocut"] = train_full_ntuples
+    output_file["train_tree_baseline"] = train_full_ntuples
     output_file["test_tree"] = test_ntuples
-    output_file["test_tree_nocut"] = test_full_ntuples
+    output_file["test_tree_baseline"] = test_full_ntuples
     output_file["eval_tree"] = eval_ntuples
-    output_file["eval_tree_nocut"] = eval_full_ntuples
+    output_file["eval_tree_baseline"] = eval_full_ntuples
   print('Tree saved to '+output_filename)
   in_file.close()
 
@@ -141,7 +142,12 @@ if __name__ == '__main__':
   ntuple, branches = combine_ntuples(class_filenames)
 
   # Split sample into training, validation, and testing tree using event number. ([0,3,6,9]=training,[1,4,7]=validation,[2,5,8]=testing)
-  split_ntuple(ntuple, branches, uproot_cut='(lly_m>120) & (lly_m<130)', weight_branch_names=['weightXyear','w_lumiXyear'], output_filename='ntuples/ggf_mva_ntuples.root')
+  #split_ntuple(ntuple, branches, uproot_cut='trigger & pass_filter & (lly_m>120) & (lly_m<130) & (y_id80>0) & (y_pt/lly_m>15./110) & (leplep_m>80) & (leplep_m<100) & (lly_m+leplep_m>185) & (lly_m>100) & (lly_m<180) & (njet<=1) & (nlep<=2) & (met<90)', weight_branch_names=['weightXyear','w_lumiXyear'], output_filename='ntuples/ggf_mva_ntuples.root')
+  split_ntuple(ntuple, branches,
+    baseline_cut = '(trigger>0) & (pass_filter>0) & (y_id80>0) & (y_pt/lly_m>15./110) & (leplep_m>80) & (leplep_m<100) & (lly_m+leplep_m>185) & (lly_m>100) & (lly_m<180) & (njet<=1) & (nlep<=2) & (met<90)',
+    train_cut =    '(trigger>0) & (pass_filter>0) & (y_id80>0) & (y_pt/lly_m>15./110) & (leplep_m>80) & (leplep_m<100) & (lly_m+leplep_m>185) & (lly_m>100) & (lly_m<180) & (njet<=1) & (nlep<=2) & (met<90) & (lly_m>120) & (lly_m<130)',
+    weight_branch_names=['weightXyear','w_lumiXyear'], 
+    output_filename = 'ntuples/ggf_mva_ntuples.root')
 
   elapsed_time = time.time() - start_time
   print(f'Elapsed time: {elapsed_time}')
