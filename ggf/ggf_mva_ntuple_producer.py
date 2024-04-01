@@ -560,18 +560,18 @@ if __name__ == '__main__':
 
   np.random.seed(1)
 
-  ## Combine signal and background samples into one ntuple AND mix up signal and background event sequence.
-  ## classID, sampleID, sample_filename
-  #class_filenames = [
-  #             [0, 1, 'ntuples/ggf_ntuples_ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018.root'],
-  #             [0, 2, 'ntuples/ggf_ntuples_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018.root'],
-  #             [1, 3, 'ntuples/ggf_ntuples_GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_2016APV201620172018.root'],
-  #             ]
-  #ntuple, branches = combine_ntuples(class_filenames)
-  ## Split sample into training, validation, and testing tree using event number. 
-  #split_ntuple(ntuple, branches, baseline_cut, train_cut,
-  #  weight_branch_names=['weightXyear','w_lumiXyear'], 
-  #  output_filename = f'ntuples/{name_tag}_ntuples.root')
+  # Combine signal and background samples into one ntuple AND mix up signal and background event sequence.
+  # classID, sampleID, sample_filename
+  class_filenames = [
+               [0, 1, 'ntuples/ggf_ntuples_ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018.root'],
+               [0, 2, 'ntuples/ggf_ntuples_DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8_2016APV201620172018.root'],
+               [1, 3, 'ntuples/ggf_ntuples_GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8_2016APV201620172018.root'],
+               ]
+  ntuple, branches = combine_ntuples(class_filenames)
+  # Split sample into training, validation, and testing tree using event number. 
+  split_ntuple(ntuple, branches, baseline_cut, train_cut,
+    weight_branch_names=['weightXyear','w_lumiXyear'], 
+    output_filename = f'ntuples/{name_tag}_ntuples.root')
   
   # Make decorrelation variables. Later move to ggf_ntuple_producer.py
   init_apply_decorr_func()
