@@ -64,7 +64,7 @@ if __name__ == "__main__":
     train_tree_name = 'train_tree'
     weight_method = 0 # Weight signal and background equally
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
-    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']
+    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l2_pt']
     bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
     train_cut = '1'
   print(f'Training XGBoost with method {method_id}, {mva_name}')
