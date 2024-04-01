@@ -27,19 +27,19 @@ source py-env/bin/activate
 
 # Producing ntuples:
 1. Produce ntuples from picos. 
-  - ggf_ntuple_producer.py
-  - vbf_ntuple_producer.py
+  - `ggf_ntuple_producer.py`
+  - `vbf_ntuple_producer.py`
 2. Make training, validation, and testing ntuples. Apply cut for training. Add additional variables.
-  - ggf_mva_ntuple_producer.py
-  - vbf_mva_ntuple_producer.py
+  - `ggf_mva_ntuple_producer.py`
+  - `vbf_mva_ntuple_producer.py`
 3. Make training, validation, and testing ntuples with loose photon ID.
-  - ggf_mva_ntuple_producer.py -b hig19014
+  - `ggf_mva_ntuple_producer.py -b hig19014`
 
 # Procedure for training BDTs:
-Run the BDT producer
- - ggf_train_tmva_standard.py -i 0
- - ggf_train_xgboost_standard.py -i 0
- - vbf_train_tmva_standard.py
+Run the BDT trainer
+ - `ggf_train_tmva_standard.py`
+ - `ggf_train_xgboost_standard.py`
+ - `vbf_train_tmva_standard.py`
 
 # Procedure for measuring performance of MVAs
 1. Edit the `ggf_measure_performance.py` to include the trained MVA
