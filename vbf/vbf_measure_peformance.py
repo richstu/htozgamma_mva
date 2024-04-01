@@ -138,6 +138,6 @@ if __name__ == '__main__':
     os.system(command)
 
     # Final mass plots
-    command = f'pdf_combine.py -f -i plots/{mva_name}_binned_mva_mlly_bin0_per_sample.pdf plots/{mva_name}_binned_mva_mlly_bin1_per_sample.pdf plots/{mva_name}_binned_mva_mlly_bin2_per_sample.pdf plots/{mva_name}_binned_mva_mlly_bin3_per_sample.pdf plots/{mva_name}_binned_mva_per_sample.pdf plots/{mva_name}_bkg_hist_mva.pdf plots/{mva_name}_sig_hist_mva.pdf plots/{mva_name}_signal_resolution.pdf'
+    command = f'pdf_combine.py -f -i plots/{mva_name}_binned_mva_mlly_bin0_per_sample.pdf plots/{mva_name}_binned_mva_mlly_bin1_per_sample.pdf plots/{mva_name}_binned_mva_mlly_bin2_per_sample.pdf plots/{mva_name}_binned_mva_per_sample.pdf plots/{mva_name}_bkg_hist_mva.pdf plots/{mva_name}_sig_hist_mva.pdf plots/{mva_name}_signal_resolution.pdf'
     command += f' -x 4 -y 2 -o plots/summary_{mva_name}_mass_shape.pdf'
     os.system(command)
