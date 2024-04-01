@@ -30,7 +30,10 @@ if __name__ == '__main__':
   # Match mva_name to name used in training to make summary output pdfs
   # mva_info[mva_name] = [mva_result root filename, dict of information]
   mva_info = {\
-    'standard_tmva_bdt':['mva_output/standard_tmva_bdt_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
+    #'standard_tmva_bdt':['mva_output/standard_tmva_bdt_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
+    #'standard_tmva_bdt_hig19014':['mva_output/standard_tmva_bdt_hig19014_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
+    'standard_xgboost':['mva_output/standard_xgboost_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
+    #'standard_xgboost_hig19014':['mva_output/standard_xgboost_hig19014_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
   }
 
   # Measure performance

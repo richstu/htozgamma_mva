@@ -1012,7 +1012,7 @@ def draw_binned_signi_detail(binned_signi_detail_dict, name_tag=''):
     sig_hist.Draw()
     bkg_hist.Draw('same')
     # Draw bin cuts
-    y_max = sig_hist.GetMaximum()
+    y_max = max(sig_hist.GetMaximum(), bkg_hist.GetMaximum())
     edge_lines = []
     for iEdge in range(len(bin_edges)):
       edge_line = ROOT.TLine(bin_edges[iEdge],0,bin_edges[iEdge],y_max)
@@ -1035,10 +1035,12 @@ def draw_binned_signi_detail(binned_signi_detail_dict, name_tag=''):
     c3 = new_canvas()
     c3.SetLeftMargin(0.15)
     colors = [4,800-7,8,1,6,7,8,9,46,49,41,38,30,33]
+    y_max = -1
     for isample, sample_id in enumerate(mva_hists):
       mva_hist = mva_hists[sample_id]
       mva_hist.SetLineColor(colors[isample])
       mva_hist.SetTitle(';MVA value;Normalized')
+      y_max = max(y_max, mva_hist.GetMaximum())
       normalize_hist(mva_hist)
       if isample==0: mva_hist.Draw()
       else: mva_hist.Draw('same')

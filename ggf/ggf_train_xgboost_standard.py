@@ -119,6 +119,7 @@ if __name__ == "__main__":
 
   # Save xgboost model
   xgbdt_classifier.save_model('mva_output/{mva_name}_xgboost_model.json')
+  print(f'Saved xgboost model to mva_output/{mva_name}_xgboost_model.json')
   # Load xgboost model
   xgbdt_classifier.load_model('mva_output/{mva_name}_xgboost_model.json')
 
