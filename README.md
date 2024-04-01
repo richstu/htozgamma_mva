@@ -1,24 +1,21 @@
 # HToZGamma MVA ReadMe
 
 # Environment requirements
-- Above ROOT 6.26
-- uproot
-- numpy
+- ROOT version >= 6.26
+- uproot, numpy
+- scikit-learn, matplotlib
+- xgboost, shap, torch
 
-## (Optional) Install python environment for gpu training (For cms37 UCSB server)
-source set_env.sh.gpu
+# Installing python environment on UCSB servers (CentOS7)
+```source set_env.sh
 python3 -m venv py-env
 source py-env/bin/activate
 pip3 install --upgrade pip
-pip3 install torch torchvision torchaudio
-pip3 install uproot numpy scikit-learn matplotlib
-pip3 install jupyterlab xgboost slugify tensorboard shap
+pip3 install uproot numpy scikit-learn matplotlib xgboost shap 
+pip3 install torch --index-url https://download.pytorch.org/whl/cpu```
 
-## Setup python environment on UCSB servers
-- For cms11
-```source set_env.sh```
-- For cms37 (GPU training)
-```source set_env.sh.gpu
+# Setup python environment on UCSB servers
+```source set_env.sh
 source py-env/bin/activate```
 
 # Setup folders
@@ -28,18 +25,18 @@ source py-env/bin/activate```
 1. Produce ntuples from picos. 
   - ggf_ntuple_producer.py
   - vbf_ntuple_producer.py
-2. Make training, validation, and testing ntuples. Apply cut for training.
+2. Make training, validation, and testing ntuples. Apply cut for training. Add additional variables.
   - ggf_mva_ntuple_producer.py
   - vbf_mva_ntuple_producer.py
+3. Make training, validation, and testing ntuples with loose photon ID.
+  - ggf_mva_ntuple_producer.py -b hig19014
 
-# Procedure for making BDTs:
-1. Run the BDT producer
-   - ggf_train_tmva_hig19014.py
-   - vbf_train_tmva_hig19014.py
+# Procedure for training BDTs:
+Run the BDT producer
+ - ggf_train_tmva_standard.py -i 0
+ - ggf_train_xgboost_standard.py -i 0
+ - vbf_train_tmva_standard.py
 
 # Procedure for measuring performance of MVAs
-TODO
-1. Measure significance
-2. Measure AUC
-3. Measure correlation with lly_m
-4. Measure overtraining
+1. Edit the ```ggf_measure_performance.py``` to include the trained MVA
+2. Run the ```ggf_measure_performance.py``` script

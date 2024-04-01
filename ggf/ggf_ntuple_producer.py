@@ -319,7 +319,6 @@ if __name__=='__main__':
   start_time = time.time()
  
   years = ["2016APV","2016","2017","2018"]
-  #years = ["2017"]
 
   #make n-tuples
   defines = [
@@ -338,6 +337,7 @@ if __name__=='__main__':
        ('y_ptmass','photon_pt[0]/llphoton_m[0]'),      
        ('l1_eta','get_l1_eta(el_pt,el_eta,mu_pt,mu_eta,ll_lepid,ll_i1,ll_i2)'),
        ('l2_eta','get_l2_eta(el_pt,el_eta,mu_pt,mu_eta,ll_lepid,ll_i1,ll_i2)'),
+       ('yl_drminmass','photon_drmin[0]/llphoton_m[0]'),
 
        # event filters
        ('trigger','get_trigger(ll_lepid,nel,el_sig,el_pt,HLT_Ele27_WPTight_Gsf,HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ,HLT_Ele32_WPTight_Gsf_L1DoubleEG,HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL,HLT_Ele32_WPTight_Gsf,HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL,nmu,mu_sig,mu_pt,HLT_IsoMu24 || HLT_IsoTkMu24,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ || HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL || HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ,HLT_IsoMu27,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8 || HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8,HLT_IsoMu24,HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass3p8, year)'),
@@ -368,7 +368,7 @@ if __name__=='__main__':
        ('event_number','event'),
        ]
  
-  branches = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','ht','phi','y_res','y_eta','y_pt','y_ptmass','l1_eta','l2_eta']
+  branches = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','ht','phi','y_res','y_eta','y_pt','y_ptmass','l1_eta','l2_eta', 'yl_drminmass']
   branches.extend(['lly_m','l1_pt','l2_pt','l1_phi','l2_phi','y_phi','y_id80'])
   branches.extend(['leplep_pt','leplep_eta','leplep_phi','leplep_m','leplep_flavor'])
   branches.extend(['lly_pt','lly_eta','lly_phi','lly_ptt'])
@@ -379,13 +379,12 @@ if __name__=='__main__':
   #make n-tuples
   cuts = ['trigger', 'pass_filter', 'llphoton_m.size()>0 && photon_pt.size()>0',
           'use_event', 'leplep_m>50']
-    
 
   names = 'ggf_ntuples'
   base_dir  = '/net/cms11/cms11r0/pico/NanoAODv9/htozgamma_kingscanyon_v1/'
   pico_type = '/mc/merged_zgmc_llg/'
-  sig_samples = ['*GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root','*VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root']                              
-  bkg_samples = ['*ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*ZGToLLG_01J_5f_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8*.root']
+  sig_samples = ['*GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root']
+  bkg_samples = ['*ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root']
   print([base_dir + year + pico_type + sig for sig in sig_samples for year in years])
   print([base_dir + year + pico_type  + bkg for bkg in bkg_samples for year in years])
 

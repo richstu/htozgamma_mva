@@ -1,3 +1,0 @@
-source /homes/jbkim/Linux/el7_gpu/root-6.26.06/bin/thisroot.sh
-export LD_LIBRARY_PATH=/homes/jbkim/Linux/el7_gpu/lib:/homes/jbkim/Linux/el7_gpu/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-export PATH=/homes/jbkim/Linux/el7_gpu/bin${PATH:+:${PATH}}
