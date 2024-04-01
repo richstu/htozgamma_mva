@@ -68,11 +68,11 @@ if __name__ == '__main__':
   mva_ntuple_producer_tools.apply_decorr_func(decorr_variables, decorr_func_filename, decorr_defines, decorr_cuts,
                     input_filename=f'ntuples/{name_tag}_ntuples.root', output_filename=f'ntuples/{name_tag}_decorr_ntuples.root')
 
-  # Evaluate nominal features
+  # Evaluate nominal features (Group by 6 features)
   features = ['y_mva', 'y_res', 'yl_drmin', 'yl_drminmass','yl_drmax', 'yl_drmaxmass',
-    'cosTheta', 'cosThetamass', 'cosThetamass2', 'cosThetamass3','costheta','phi', 'lly_pt', 'lly_ptmass',
-    'y_eta','l1_eta','l2_eta', 'y_pt', 'y_ptmass', 'y_pt_decorr', 
-    'l1_pt', 'l1_ptmass', 'l2_pt',]
+    'cosTheta', 'cosThetamass', 'cosThetamass2', 'cosThetamass3','costheta','phi', 
+    'y_pt', 'y_ptmass', 'y_pt_decorr', 'l1_pt', 'l1_ptmass', 'l2_pt',
+    'lly_pt', 'lly_ptmass', 'y_eta','l1_eta','l2_eta', ]
   measure_tools.plot_feature_shapes(root_filename=f'ntuples/{name_tag}_decorr_ntuples.root', tree_name='train_tree_baseline', 
     observable_name = 'lly_m', feature_names = features, weight_name = 'weightXyear', 
     split_cut = 'classID==1', observable_cut = 'classID==0', filename_tag = f'{name_tag}_decorr_ntuples')

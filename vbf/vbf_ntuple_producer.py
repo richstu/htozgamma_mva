@@ -841,6 +841,7 @@ if __name__=='__main__':
            ('l1_phi','get_l1_phi(el_pt,el_phi,mu_pt,mu_phi,ll_lepid,ll_i1,ll_i2)'),
            ('l2_phi','get_l2_phi(el_pt,el_phi,mu_pt,mu_phi,ll_lepid,ll_i1,ll_i2)'),
            ('y_phi','photon_phi[0]'),     
+           ('y_id80', 'photon_id80[0]'),
            ('leplep_pt', 'll_pt[0]'),
            ('leplep_eta', 'll_eta[0]'),
            ('leplep_phi', 'll_phi[0]'),
@@ -878,7 +879,7 @@ if __name__=='__main__':
   # Alternative mva variables
   branches.extend(['jj_m','llyj_detamin','llyj_dphimin','llyjj_zep','llyjj_zeppt','yj_drmin','l1_pt','l2_pt','j1_eta','j2_eta','njet'])
   # Misc. variables
-  branches.extend(['lly_m','l1_phi','l2_phi','y_phi'])
+  branches.extend(['lly_m','l1_phi','l2_phi','y_phi', 'y_id80'])
   branches.extend(['leplep_pt','leplep_eta','leplep_phi','leplep_m','leplep_flavor','leplep_charge'])
   branches.extend(['lly_pt','lly_eta','lly_phi'])
   branches.extend(['j1_phi','j2_phi','j1_m','j2_m'])

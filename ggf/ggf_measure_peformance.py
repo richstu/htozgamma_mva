@@ -41,14 +41,14 @@ if __name__ == '__main__':
   mva_info = {\
     #'standard_tmva_bdt':['mva_output/standard_tmva_bdt_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']}],
     #'standard_tmva_bdt_hig19014':['mva_output/standard_tmva_bdt_hig19014_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']}],
-    #'tmva_bdt_decorr':['mva_output/tmva_bdt_decorr_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']}],
+    #'tmva_bdt_decorr':['mva_output/tmva_bdt_decorr_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']}],
     #'tmva_bdt_windowcut_hig19014':['mva_output/tmva_bdt_windowcut_hig19014_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']}],
-    #'tmva_bdt_windowcut_decorr_hig19014':['mva_output/tmva_bdt_windowcut_decorr_hig19014_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']}],
+    #'tmva_bdt_windowcut_decorr_hig19014':['mva_output/tmva_bdt_windowcut_decorr_hig19014_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']}],
     #'standard_xgboost':['mva_output/standard_xgboost_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']}],
     #'standard_xgboost_hig19014':['mva_output/standard_xgboost_hig19014_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']}],
-    #'xgboost_decorr':['mva_output/xgboost_decorr_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']}],
+    #'xgboost_decorr':['mva_output/xgboost_decorr_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']}],
     #'xgboost_windowcut_hig19014':['mva_output/xgboost_windowcut_hig19014_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']}],
-    #'xgboost_windowcut_decorr_hig19014':['mva_output/xgboost_windowcut_decorr_hig19014_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']}],
+    #'xgboost_windowcut_decorr_hig19014':['mva_output/xgboost_windowcut_decorr_hig19014_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2], 'sig_ids':[3], 'x':['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']}],
   }
 
   # Measure performance
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     auc_sci, auc_sci_detail = measure_tools.calculate_auc_sci(mva_filename, 'eval_tree', branches, detail_output=True)
     print(f'[{mva_name}] AUC: {auc_sci[0]*100:.1f}% CSI: {auc_sci[1]:.2f}')
     train_auc_sci, train_auc_sci_detail = measure_tools.calculate_auc_sci(mva_filename, 'train_tree', branches, detail_output=True)
-    print(f'[{mva_name}] AUC (train): {auc_sci[0]*100:.1f}% CSI (train): {auc_sci[1]:.2f}')
+    print(f'[{mva_name}] AUC (train): {train_auc_sci[0]*100:.1f}% CSI (train): {train_auc_sci[1]:.2f}')
     # Calculation for plotting
     sig_mass_shape_difference, sig_mass_difference_detail = measure_tools.calculate_mass_shape_difference(mva_filename, 'eval_tree_baseline', branches, y_value=1,detail_output=True)
     bkg_feature_shape_difference = measure_tools.find_feature_shape_difference(mva_filename, 'eval_tree_baseline', branches, y_value=0)
@@ -118,7 +118,7 @@ if __name__ == '__main__':
   measure_tools.draw_binned_signi_detail(train_binned_signi_detail_dict,name_tag='train')
   measure_tools.draw_binned_signi_detail_train_eval(binned_signi_detail_dict, train_binned_signi_detail_dict)
   measure_tools.draw_auc_sci_detail(auc_sci_detail_dict)
-  measure_tools.draw_sci_detail_train_eval(auc_sci_detail_dict, train_auc_sci_detail)
+  measure_tools.draw_sci_detail_train_eval(auc_sci_detail_dict, train_auc_sci_detail_dict)
   measure_tools.draw_feature_shape_difference(bkg_feature_difference_detail_dict,name_tag='bkg_8bin')
   measure_tools.draw_feature_shape_difference(sig_feature_difference_detail_dict,name_tag='sig_8bin')
   measure_tools.draw_feature_shape_difference(bkg_feature_difference_in_bin_detail_dict,name_tag='bkg_4bin')

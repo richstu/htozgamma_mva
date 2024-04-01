@@ -2,16 +2,7 @@
 import ROOT
 ROOT.gROOT.SetBatch(ROOT.kTRUE)
 import math
-import numpy as np
-import sklearn.metrics
-import uproot
-import matplotlib.pyplot as plt
-import array
-import ctypes
-import re
 import os
-import shap
-from ctypes import c_double
 
 import sys
 sys.path.append('../python_scripts')
@@ -39,7 +30,7 @@ if __name__ == '__main__':
   # Match mva_name to name used in training to make summary output pdfs
   # mva_info[mva_name] = [mva_result root filename, dict of information]
   mva_info = {\
-    #'standard_tmva_bdt':['mva_output/standard_tmva_bdt_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
+    'standard_tmva_bdt':['mva_output/standard_tmva_bdt_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
   }
 
   # Measure performance
@@ -68,7 +59,7 @@ if __name__ == '__main__':
     auc_sci, auc_sci_detail = measure_tools.calculate_auc_sci(mva_filename, 'eval_tree', branches, detail_output=True)
     print(f'[{mva_name}] AUC: {auc_sci[0]*100:.1f}% CSI: {auc_sci[1]:.2f}')
     train_auc_sci, train_auc_sci_detail = measure_tools.calculate_auc_sci(mva_filename, 'train_tree', branches, detail_output=True)
-    print(f'[{mva_name}] AUC (train): {auc_sci[0]*100:.1f}% CSI (train): {auc_sci[1]:.2f}')
+    print(f'[{mva_name}] AUC (train): {train_auc_sci[0]*100:.1f}% CSI (train): {train_auc_sci[1]:.2f}')
     # Calculation for plotting
     sig_mass_shape_difference, sig_mass_difference_detail = measure_tools.calculate_mass_shape_difference(mva_filename, 'eval_tree_baseline', branches, y_value=1,detail_output=True)
     bkg_feature_shape_difference = measure_tools.find_feature_shape_difference(mva_filename, 'eval_tree_baseline', branches, y_value=0)
@@ -109,7 +100,7 @@ if __name__ == '__main__':
   measure_tools.draw_binned_signi_detail(train_binned_signi_detail_dict,name_tag='train')
   measure_tools.draw_binned_signi_detail_train_eval(binned_signi_detail_dict, train_binned_signi_detail_dict)
   measure_tools.draw_auc_sci_detail(auc_sci_detail_dict)
-  measure_tools.draw_sci_detail_train_eval(auc_sci_detail_dict, train_auc_sci_detail)
+  measure_tools.draw_sci_detail_train_eval(auc_sci_detail_dict, train_auc_sci_detail_dict)
   measure_tools.draw_feature_shape_difference(bkg_feature_difference_detail_dict,name_tag='bkg_8bin')
   measure_tools.draw_feature_shape_difference(sig_feature_difference_detail_dict,name_tag='sig_8bin')
   measure_tools.draw_feature_shape_difference(bkg_feature_difference_in_bin_detail_dict,name_tag='bkg_4bin')

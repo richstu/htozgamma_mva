@@ -117,6 +117,11 @@ if __name__ == "__main__":
   xgbdt_classifier = xgboost.XGBClassifier(**bdt_settings)
   xgbdt_classifier.fit(train_feature_array, train_hot_label_array[:,nlabels-1], sample_weight=train_weight_array)
 
+  # Save xgboost model
+  xgbdt_classifier.save_model('mva_output/{mva_name}_xgboost_model.json')
+  # Load xgboost model
+  xgbdt_classifier.load_model('mva_output/{mva_name}_xgboost_model.json')
+
   ## Run trained bdt over full set
   print("Evaluating xgboost")
   tree_names = [str(key.split(';')[0]) for key in uproot.open(input_mva_ntuple).keys()]

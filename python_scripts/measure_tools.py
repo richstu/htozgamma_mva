@@ -1,9 +1,12 @@
 import ROOT
 import array
-from ctypes import c_double
+import ctypes
 import math
 import numpy as np
 import os
+import matplotlib.pyplot as plt
+import sklearn.metrics
+import uproot
 
 import unicodedata
 import re
@@ -120,11 +123,11 @@ def calculate_significance(root_filename, tree_name, branches, fixed_width=False
     tmva_chain.Draw(f"{branches['observable']}>>hist",f'({branches["y"]}==1&&{mva_window}&&{mass_window})*{branches["weight"]}',"goff")
     #nevents_signal = hist.GetSum()
     nentries_signal = hist.GetEntries()
-    bin_s_err = c_double()
+    bin_s_err = ctypes.c_double()
     nevents_signal = hist.IntegralAndError(0,hist.GetNbinsX()+1, bin_s_err);
     bin_s_err = bin_s_err.value
     tmva_chain.Draw(f"{branches['observable']}>>hist",f'({branches["y"]}==0&&{mva_window}&&{mass_window})*{branches["weight"]}',"goff")
-    bin_b_err = c_double()
+    bin_b_err = ctypes.c_double()
     nevents_background = hist.IntegralAndError(0,hist.GetNbinsX()+1, bin_b_err);
     bin_b_err = bin_b_err.value
     #nevents_background = hist.GetSum()
@@ -1199,7 +1202,7 @@ def draw_auc_sci_detail(auc_sci_detail_dict,name_tag=''):
     c3.SaveAs(f"plots/{mva_name}_int_auc_graph{name_tag}.pdf")
 
 # auc_sci_detail = (auc, sci, bins, areas, signis)
-def draw_sci_detail_train_eval(auc_sci_detail_dict, train_auc_sci_detail):
+def draw_sci_detail_train_eval(auc_sci_detail_dict, train_auc_sci_detail_dict):
   for mva_name in auc_sci_detail_dict:
     auc, sci, bins, areas, signis = auc_sci_detail_dict[mva_name]
     train_auc, train_sci, train_bins, train_areas, train_signis = train_auc_sci_detail_dict[mva_name]
@@ -1219,7 +1222,6 @@ def draw_sci_detail_train_eval(auc_sci_detail_dict, train_auc_sci_detail):
 
 # Used branches: {'yhat', 'observable'}
 def calculate_obs_mva_correlation(root_filename, tree_name, branches):
-  root_filename = mva_filename
   tree_name = 'eval_tree_baseline'
   root_file = uproot.open(root_filename)
   yhat_array = root_file[tree_name][branches['yhat']].array(library='np')

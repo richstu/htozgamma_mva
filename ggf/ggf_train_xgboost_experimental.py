@@ -64,7 +64,7 @@ if __name__ == "__main__":
     train_tree_name = 'train_tree'
     weight_method = 0 # Weight signal and background equally
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
-    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']
+    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']
     bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
     train_cut = '1'
   if method_id == 1: 
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     train_tree_name = 'train_tree_baseline'
     weight_method = 0 # Weight signal and background equally
     input_mva_ntuple = 'ntuples/ggf_mva_hig19014_decorr_ntuples.root'
-    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']
+    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']
     bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
     train_cut = '(lly_m>120)&(lly_m<130)'
   print(f'Training XGBoost with method {method_id}, {mva_name}')
@@ -124,6 +124,11 @@ if __name__ == "__main__":
   print("Training xgboost")
   xgbdt_classifier = xgboost.XGBClassifier(**bdt_settings)
   xgbdt_classifier.fit(train_feature_array, train_hot_label_array[:,nlabels-1], sample_weight=train_weight_array)
+
+  # Save xgboost model
+  xgbdt_classifier.save_model('mva_output/{mva_name}_xgboost_model.json')
+  # Load xgboost model
+  xgbdt_classifier.load_model('mva_output/{mva_name}_xgboost_model.json')
 
   ## Run trained bdt over full set
   print("Evaluating xgboost")
