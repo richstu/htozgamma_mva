@@ -30,8 +30,8 @@ if __name__ == '__main__':
   # Match mva_name to name used in training to make summary output pdfs
   # mva_info[mva_name] = [mva_result root filename, dict of information]
   mva_info = {\
-    #'standard_tmva_bdt':['mva_output/standard_tmva_bdt_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
-    'standard_tmva_bdt_hig19014':['mva_output/standard_tmva_bdt_hig19014_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
+    'standard_tmva_bdt':['mva_output/standard_tmva_bdt_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
+    #'standard_tmva_bdt_hig19014':['mva_output/standard_tmva_bdt_hig19014_results.root', {'y':'classID', 'yhat':'BDT', 'weight': 'weightXyear', 'observable':'lly_m', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
     #'standard_xgboost':['mva_output/standard_xgboost_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
     #'standard_xgboost_hig19014':['mva_output/standard_xgboost_hig19014_results.root', {'y':'y', 'yhat':'yhat', 'weight': 'weight', 'observable':'mass', 'sample_id':'sampleID', 'bkg_ids':[1,2,3], 'sig_ids':[4,5], 'x':['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']}],
   }
@@ -55,10 +55,10 @@ if __name__ == '__main__':
     print(f'[{mva_name}] Observable-MVA correlation: {obs_mva_correlation:.3f}')
     pvalue_signal, pvalue_bkg, overtrain_detail = measure_tools.calculate_overtraining(mva_filename, 'train_tree', 'eval_tree', branches, narrow_mass_window=True, detail_output=True)
     print(f'[{mva_name}] chi-2 pvalue (test,eval): signal: {pvalue_signal:.4f} background: {pvalue_bkg:.4f}')
-    binned_significance, binned_significance_err, binned_signi_detail = measure_tools.calculate_binned_significance(mva_filename, 'eval_tree_baseline', branches, detail_output=True, mva_nbins=4, throw_away_bin=0)
-    print(f'[{mva_name}] Significance 4 bins: {binned_significance:.3f} +- {binned_significance_err:.3f}')
-    train_binned_significance, train_binned_significance_err, train_binned_signi_detail = measure_tools.calculate_binned_significance(mva_filename, 'train_tree_baseline', branches, detail_output=True, mva_nbins=4, throw_away_bin=0)
-    print(f'[{mva_name}] Significance 4 bins (train): {train_binned_significance:.3f} +- {train_binned_significance_err:.3f}')
+    binned_significance, binned_significance_err, binned_signi_detail = measure_tools.calculate_binned_significance(mva_filename, 'eval_tree_baseline', branches, detail_output=True, mva_nbins=3, throw_away_bin=0)
+    print(f'[{mva_name}] Significance 3 bins: {binned_significance:.3f} +- {binned_significance_err:.3f}')
+    train_binned_significance, train_binned_significance_err, train_binned_signi_detail = measure_tools.calculate_binned_significance(mva_filename, 'train_tree_baseline', branches, detail_output=True, mva_nbins=3, throw_away_bin=0)
+    print(f'[{mva_name}] Significance 3 bins (train): {train_binned_significance:.3f} +- {train_binned_significance_err:.3f}')
     auc_sci, auc_sci_detail = measure_tools.calculate_auc_sci(mva_filename, 'eval_tree', branches, detail_output=True)
     print(f'[{mva_name}] AUC: {auc_sci[0]*100:.1f}% CSI: {auc_sci[1]:.2f}')
     train_auc_sci, train_auc_sci_detail = measure_tools.calculate_auc_sci(mva_filename, 'train_tree', branches, detail_output=True)
