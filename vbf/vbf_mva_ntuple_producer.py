@@ -28,11 +28,6 @@ if __name__ == '__main__':
     decorr_cuts = [] # Used when producing decorr variables.
   elif args.baseline == 'hig19014':
     name_tag = 'vbf_mva_highig19014'
-    baseline_cut = '(trigger>0) & (pass_filter>0) & (use_event>0) & (y_pt/lly_m>15./110) & (leplep_m>50) & (lly_m+leplep_m>185) & (lly_m>100) & (lly_m<180) & (njet>=2) & (nlep==2)'
-    train_cut =    '(trigger>0) & (pass_filter>0) & (use_event>0) & (y_pt/lly_m>15./110) & (leplep_m>50) & (lly_m+leplep_m>185) & (lly_m>100) & (lly_m<180) & (njet>=2) & (nlep==2)'
-    decorr_cuts = [] # Used when producing decorr variables.
-  elif args.baseline == 'hig19014equal':
-    name_tag = 'vbf_mva_highig19014equal'
     baseline_cut = '(trigger>0) & (pass_filter>0) & (use_event>0) & (y_pt/lly_m>15./110) & (leplep_m>50) & (lly_m+leplep_m>185) & (lly_m>100) & (lly_m<180) & (njet>=2) & (nlep==2) & (nbdfm==0)'
     train_cut =    '(trigger>0) & (pass_filter>0) & (use_event>0) & (y_pt/lly_m>15./110) & (leplep_m>50) & (lly_m+leplep_m>185) & (lly_m>100) & (lly_m<180) & (njet>=2) & (nlep==2) & (nbdfm==0)'
     decorr_cuts = [] # Used when producing decorr variables.

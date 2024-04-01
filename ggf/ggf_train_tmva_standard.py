@@ -50,7 +50,9 @@ def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight
 
 def tmva_shap_importance(root_filename, tree_name, features, tmva_name, tmva_weights, output_tag, nevents=100):
   print("Using SHAP to evaluate feature importance")
-  ROOT.gInterpreter.ProcessLine('.L root_scripts/infer_tmva.C+')
+  if f'-I{os.environ["WORK_DIR"]}/root_scripts' not in ROOT.gSystem.GetIncludePath():
+    ROOT.gSystem.AddIncludePath(f'-I{os.environ["WORK_DIR"]}/root_scripts')
+  ROOT.gInterpreter.ProcessLine('.L infer_tmva.C+')
   mva_file = uproot.open(root_filename)
   input_ntuple = mva_file[tree_name].arrays(features)
   input_ntuple = input_ntuple.to_numpy()
@@ -135,7 +137,9 @@ if __name__ == "__main__":
   
   # Run trained bdt over full set
   tree_names = [str(key.split(';')[0]) for key in uproot.open(input_mva_ntuple).keys()]
-  ROOT.gInterpreter.ProcessLine('.L ../root_scripts/infer_tmva.C+')
+  if f'-I{os.environ["WORK_DIR"]}/root_scripts' not in ROOT.gSystem.GetIncludePath():
+    ROOT.gSystem.AddIncludePath(f'-I{os.environ["WORK_DIR"]}/root_scripts')
+  ROOT.gInterpreter.ProcessLine('.L infer_tmva.C+')
   infer_output_filename = f'mva_output/{bdt_name}_results.root'
   ROOT.infer_tmva(f"{input_mva_ntuple}", tree_names, "BDT", f"{output_model_folder}/weights/TMVAClassification_BDT.weights.xml", f"{infer_output_filename}")
 

@@ -947,7 +947,9 @@ def calculate_binned_significance(root_filename, tree_name, branches, mva_nbins=
   chain.Draw(f"{branches['yhat']}>>bkg_hist",f"({branches['observable']}>{mass_window[0]}&&{branches['observable']}<{mass_window[1]}&&{branches['y']}==0&&{base_cut})*{branches['weight']}","goff")
   chain.Draw(f"{branches['yhat']}>>sig_hist",f"({branches['observable']}>{mass_window[0]}&&{branches['observable']}<{mass_window[1]}&&{branches['y']}==1&&{base_cut})*{branches['weight']}","goff")
   # Find bin edges
-  ROOT.gInterpreter.ProcessLine('.L ../root_scripts/evaluate_mva.C+')
+  if f'-I{os.environ["WORK_DIR"]}/root_scripts' not in ROOT.gSystem.GetIncludePath():
+    ROOT.gSystem.AddIncludePath(f'-I{os.environ["WORK_DIR"]}/root_scripts')
+  ROOT.gInterpreter.ProcessLine('.L evaluate_mva.C+')
   # results = [(mva_nbins, bin_edges, significance, significance_err, significances, significance_errs, signal_yield, background_yield)]
   if detail_output == False: max_bins = mva_nbins
   else: max_bins = mva_nbins+1

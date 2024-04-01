@@ -872,7 +872,7 @@ if __name__=='__main__':
            ]
   
   # Kinematic bdt variables
-  branches = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta', 'phi','y_res','y_eta','y_pt','y_ptmass','l1_eta','l2_eta']
+  branches = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta', 'phi','y_res','y_eta','y_pt','y_ptmass','l1_eta','l2_eta', 'yl_drminmass']
   # Dijet bdt variables
   branches.extend(['j1_pt','j2_pt','jj_dphi','jj_deta','llyjj_dphi','yjj_zep','lly_ptthig19','lly_ptt','llyjj_ptbal','yj1_dr','yj2_dr'])
   # Alternative mva variables

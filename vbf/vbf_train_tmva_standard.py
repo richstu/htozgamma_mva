@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import ROOT
 from ROOT import TMVA, TFile, TTree, TCut, TChain, TH1F, TString, TCanvas
-
 TMVA.Tools.Instance()
 TMVA.PyMethodBase.PyInitialize()
 import math
@@ -92,47 +91,29 @@ def tmva_shap_importance(root_filename, tree_name, features, tmva_name, tmva_wei
 
 
 if __name__ == "__main__":
-  parser = argparse.ArgumentParser(description='Trains BDT usingTMVA')
-  parser.add_argument('-i','--method_id', required=True)
+  parser = argparse.ArgumentParser(description='Trains BDT using TMVA')
+  parser.add_argument('-i','--method_id', help='Train method: 0:standard_tmva_bdt, 1:standard_tmva_bdt_hig19014', default=0)
 
   args = parser.parse_args()
   method_id = int(args.method_id)
   if method_id == 0: 
-    bdt_name = 'tmva_bdt_decorr'
+    bdt_name = 'standard_tmva_bdt'
     weight_name = 'weightXyear'
     train_tree_name = 'train_tree'
     eval_tree_name = 'eval_tree'
-    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
-    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     train_cut = '1'
-  if method_id == 1: 
-    bdt_name = 'tmva_bdt_windowcut_hig19014'
+  elif method_id == 1: 
+    bdt_name = 'standard_tmva_bdt_hig19014'
     weight_name = 'weightXyear'
     train_tree_name = 'train_tree_baseline'
     eval_tree_name = 'eval_tree_baseline'
-    input_mva_ntuple = 'ntuples/ggf_mva_hig19014_decorr_ntuples.root'
-    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']
+    input_mva_ntuple = 'ntuples/vbf_mva_hig19014_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
-    train_cut = '(lly_m>120&&lly_m<130)'
-  if method_id == 2: 
-    bdt_name = 'tmva_bdt_windowcut_decorr_hig19014'
-    weight_name = 'weightXyear'
-    train_tree_name = 'train_tree_baseline'
-    eval_tree_name = 'eval_tree_baseline'
-    input_mva_ntuple = 'ntuples/ggf_mva_hig19014_decorr_ntuples.root'
-    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']
-    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
-    train_cut = '(lly_m>120&&lly_m<130)'
-  if method_id == 3: 
-    bdt_name = 'tmva_bdt_windowcut_hig19014equal'
-    weight_name = 'weightXyear'
-    train_tree_name = 'train_tree_baseline'
-    eval_tree_name = 'eval_tree_baseline'
-    input_mva_ntuple = 'ntuples/ggf_mva_hig19014equal_decorr_ntuples.root'
-    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']
-    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
-    train_cut = '(lly_m>120&&lly_m<130)'
+    train_cut = '1'
   print(f'Training with method_id: {method_id}, {bdt_name}')
 
   start_time = time.time()
