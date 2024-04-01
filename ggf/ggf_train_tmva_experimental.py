@@ -43,7 +43,6 @@ def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight
   cut_b = TCut(train_cut);
   dataloader.PrepareTrainingAndTestTree(cut_s,cut_b,f"NormMode=NumEvents:ScaleWithPreselEff:!V");
 
-  # Rui's settings
   factory.BookMethod(dataloader,TMVA.Types.kBDT,"BDT", bdt_setting);
   factory.TrainAllMethods();
   factory.TestAllMethods();
@@ -121,6 +120,15 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree_baseline'
     input_mva_ntuple = 'ntuples/ggf_mva_hig19014_decorr_ntuples.root'
     features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    train_cut = '(lly_m>120&&lly_m<130)'
+  if method_id == 3: 
+    bdt_name = 'tmva_bdt_windowcut_hig19014equal'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree_baseline'
+    eval_tree_name = 'eval_tree_baseline'
+    input_mva_ntuple = 'ntuples/ggf_mva_hig19014equal_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     train_cut = '(lly_m>120&&lly_m<130)'
   print(f'Training with method_id: {method_id}, {bdt_name}')

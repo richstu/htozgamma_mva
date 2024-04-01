@@ -42,7 +42,6 @@ def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight
   cut_b = TCut(train_cut);
   dataloader.PrepareTrainingAndTestTree(cut_s,cut_b,f"NormMode=NumEvents:ScaleWithPreselEff:!V");
 
-  # Rui's settings
   factory.BookMethod(dataloader,TMVA.Types.kBDT,"BDT", bdt_setting);
   factory.TrainAllMethods();
   factory.TestAllMethods();

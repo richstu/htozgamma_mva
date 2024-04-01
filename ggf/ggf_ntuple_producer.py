@@ -374,7 +374,7 @@ if __name__=='__main__':
   branches.extend(['lly_pt','lly_eta','lly_phi','lly_ptt'])
   branches.extend(['met','j1_pt','j1_eta','j1_phi', 'njet', 'nlep'])
   branches.extend(['tru_leplep_m'])
-  branches.extend(['year', 'luminosity', 'w_lumiXyear', 'weightXyear', 'type', 'pass_filter','event_number', 'trigger'])
+  branches.extend(['year', 'luminosity', 'w_lumiXyear', 'weightXyear', 'type', 'pass_filter','event_number', 'trigger', 'use_event'])
 
   #make n-tuples
   cuts = ['trigger', 'pass_filter', 'llphoton_m.size()>0 && photon_pt.size()>0',
