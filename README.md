@@ -7,19 +7,23 @@
 - xgboost, shap, torch
 
 # Installing python environment on UCSB servers (CentOS7)
-```source set_env.sh
+```
+source set_env.sh
 python3 -m venv py-env
 source py-env/bin/activate
 pip3 install --upgrade pip
 pip3 install uproot numpy scikit-learn matplotlib xgboost shap 
-pip3 install torch --index-url https://download.pytorch.org/whl/cpu```
+pip3 install torch --index-url https://download.pytorch.org/whl/cpu
+```
 
 # Setup python environment on UCSB servers
-```source set_env.sh
-source py-env/bin/activate```
+```
+source set_env.sh
+source py-env/bin/activate
+```
 
 # Setup folders
-1. Run ```folder_setup.sh``` to make empty folders
+1. Run `folder_setup.sh` to make empty folders
 
 # Producing ntuples:
 1. Produce ntuples from picos. 
@@ -38,5 +42,5 @@ Run the BDT producer
  - vbf_train_tmva_standard.py
 
 # Procedure for measuring performance of MVAs
-1. Edit the ```ggf_measure_performance.py``` to include the trained MVA
-2. Run the ```ggf_measure_performance.py``` script
+1. Edit the `ggf_measure_performance.py` to include the trained MVA
+2. Run the `ggf_measure_performance.py` script
