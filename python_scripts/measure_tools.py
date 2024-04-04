@@ -312,14 +312,26 @@ def plot_feature_shapes(root_filename, tree_name, observable_name, feature_names
     feature_threshold_edges = find_sample_fraction_thresholds(fraction_edges, tmva_chain, feature_name, split_cut, weight_name, include_min_max=True)
     feature_bins[feature_name] = feature_threshold_edges
 
+    # Find min, max for feature. Use 0.05,0.95 quantiles
+    feature_min_max = []
+    hist = ROOT.TH1F(f"hist_{feature_name}",f"hist_{feature_name}",200,0,0)
+    tmva_chain.Draw(f'{feature_name}>>hist_{feature_name}','1','goff')
+    feature_fractions = [0.01, 0.99]
+    feature_quantiles = array.array('d', [0.]*len(feature_fractions))
+    feature_fractions = array.array('d', feature_fractions)
+    hist.GetQuantiles(len(feature_fractions), feature_quantiles, feature_fractions)
+    feature_min_max = feature_quantiles.tolist()
+
     # Make feature histogram
     feature_cut_histograms[feature_name] = []
-    hist_split_cut = ROOT.TH1F(f"hist_{feature_name}_split_cut",f"{feature_name}: {split_cut}",100,feature_bins[feature_name][0],feature_bins[feature_name][-1])
+    hist_split_cut = ROOT.TH1F(f"hist_{feature_name}_split_cut",f"{feature_name}: {split_cut}",100,feature_min_max[0],feature_min_max[1])
     tmva_chain.Draw(f"{feature_name}>>hist_{feature_name}_split_cut",f'({split_cut})*{weight_name}', 'goff')
-    hist_obs_cut = ROOT.TH1F(f"hist_{feature_name}_obs_cut",f"{feature_name}: {observable_cut}",100,feature_bins[feature_name][0],feature_bins[feature_name][-1])
+    hist_obs_cut = ROOT.TH1F(f"hist_{feature_name}_obs_cut",f"{feature_name}: {observable_cut}",100,feature_min_max[0],feature_min_max[1])
     tmva_chain.Draw(f"{feature_name}>>hist_{feature_name}_obs_cut",f'({observable_cut})*{weight_name}', 'goff')
     normalize_hist(hist_split_cut)
     normalize_hist(hist_obs_cut)
+    if hist_split_cut.GetMinimum()>0: hist_split_cut.SetMinimum(0)
+    if hist_obs_cut.GetMinimum()>0: hist_obs_cut.SetMinimum(0)
     feature_cut_histograms[feature_name] = [hist_split_cut,hist_obs_cut]
 
     # Make observable histogram in each feature bin

@@ -14,7 +14,7 @@ import uproot
 import shap
 import matplotlib.pyplot as plt
 
-def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight_name, train_tree_name, eval_tree_name, train_cut, features, bdt_setting):
+def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight_name, train_tree_name, eval_tree_name, train_cut, features, prepare_tree_setting, bdt_setting):
   output = TFile.Open(tmva_filename, 'RECREATE')
   factory = TMVA.Factory('TMVAClassification', output,
                          '!V:ROC:!Correlations:!Silent:Color:'
@@ -40,7 +40,7 @@ def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight
   dataloader.AddTree(test_chain, 'Signal', 1., 'classID==1', TMVA.Types.kTesting)
   cut_s = TCut(train_cut);
   cut_b = TCut(train_cut);
-  dataloader.PrepareTrainingAndTestTree(cut_s,cut_b,f"NormMode=NumEvents:ScaleWithPreselEff:!V");
+  dataloader.PrepareTrainingAndTestTree(cut_s,cut_b,prepare_tree_setting);
 
   factory.BookMethod(dataloader,TMVA.Types.kBDT,"BDT", bdt_setting);
   factory.TrainAllMethods();
@@ -104,6 +104,7 @@ if __name__ == "__main__":
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
   elif method_id == 1: 
     bdt_name = 'standard_tmva_bdt_hig19014'
@@ -113,6 +114,7 @@ if __name__ == "__main__":
     input_mva_ntuple = 'ntuples/ggf_mva_hig19014_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
   print(f'Training with method_id: {method_id}, {bdt_name}')
 
@@ -133,6 +135,7 @@ if __name__ == "__main__":
             eval_tree_name=eval_tree_name,
             train_cut = train_cut,
             features=features,
+            prepare_tree_setting=prepare_tree_setting,
             bdt_setting=bdt_setting)
   
   # Run trained bdt over full set

@@ -15,7 +15,7 @@ import uproot
 import shap
 import matplotlib.pyplot as plt
 
-def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight_name, train_tree_name, eval_tree_name, train_cut, features, bdt_setting):
+def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight_name, train_tree_name, eval_tree_name, train_cut, features, prepare_tree_setting, bdt_setting):
   output = TFile.Open(tmva_filename, 'RECREATE')
   factory = TMVA.Factory('TMVAClassification', output,
                          '!V:ROC:!Correlations:!Silent:Color:'
@@ -105,6 +105,7 @@ if __name__ == "__main__":
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l2_pt']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
   print(f'Training with method_id: {method_id}, {bdt_name}')
 
@@ -125,6 +126,7 @@ if __name__ == "__main__":
             eval_tree_name=eval_tree_name,
             train_cut = train_cut,
             features=features,
+            prepare_tree_setting=prepare_tree_setting,
             bdt_setting=bdt_setting)
   
   # Run trained bdt over full set

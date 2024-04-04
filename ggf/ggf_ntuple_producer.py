@@ -144,6 +144,36 @@ float H_t(RVec<float> photon_pt,RVec<float> photon_eta,RVec<float> photon_phi,
 
 }
 
+float get_st(RVec<float> photon_pt,RVec<bool> photon_sig,
+          RVec<float> el_pt,RVec<float> el_sig,
+          RVec<float> mu_pt,RVec<float> mu_sig,
+          RVec<float> jet_pt,RVec<bool> jet_isgood){
+
+    float result = 0;
+
+    for(unsigned int idx=0; idx < photon_pt.size(); ++idx) {
+      if (!photon_sig[idx]) continue;
+      result += photon_pt[idx];
+    }
+
+    for(unsigned int idx = 0; idx < jet_pt.size(); idx++){
+      if (!jet_isgood[idx]) continue;
+      result += jet_pt[idx];
+    }
+
+    for(unsigned int idx = 0; idx < el_pt.size(); idx++){
+      if (!el_sig[idx]) continue;
+      result += el_pt[idx];
+    }
+
+    for(unsigned int idx = 0; idx < mu_pt.size(); idx++){
+      if (!mu_sig[idx]) continue;
+      result += mu_pt[idx];
+    }
+
+    return result;
+}
+
 
 
 float get_weight(float w_lumi ,float w_year, RVec<float> llphoton_l1_masserr,RVec<float> llphoton_l2_masserr,RVec<float> llphoton_ph_masserr, bool isNotSig){
@@ -327,6 +357,7 @@ if __name__=='__main__':
        ('yl_drmin','photon_drmin[0]'),
        ('yl_drmax','get_max_dr(photon_eta,photon_phi,el_eta,el_phi,mu_eta,mu_phi,ll_lepid,ll_i1,ll_i2)'),
        ('ht','H_t(photon_pt,photon_eta,photon_phi,el_pt,el_eta,el_phi,mu_pt,mu_eta,mu_phi,ll_lepid,ll_i1,ll_i2,jet_pt,jet_eta,jet_phi,jet_m)'),
+       ('st','get_st(photon_pt,photon_sig,el_pt,el_sig,mu_pt,mu_sig,jet_pt,jet_isgood)'),
        ('lly_ptmass','llphoton_pt[0]/llphoton_m[0]'),
        ('cosTheta','llphoton_cosTheta[0]'),
        ('costheta','llphoton_costheta[0]'),
@@ -368,7 +399,8 @@ if __name__=='__main__':
        ('event_number','event'),
        ]
  
-  branches = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','ht','phi','y_res','y_eta','y_pt','y_ptmass','l1_eta','l2_eta', 'yl_drminmass']
+  # Select only the needed branches to reduce space
+  branches = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','ht', 'st','phi','y_res','y_eta','y_pt','y_ptmass','l1_eta','l2_eta', 'yl_drminmass']
   branches.extend(['lly_m','l1_pt','l2_pt','l1_phi','l2_phi','y_phi','y_id80'])
   branches.extend(['leplep_pt','leplep_eta','leplep_phi','leplep_m','leplep_flavor'])
   branches.extend(['lly_pt','lly_eta','lly_phi','lly_ptt'])

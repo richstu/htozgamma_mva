@@ -64,7 +64,7 @@ if __name__ == "__main__":
     train_tree_name = 'train_tree'
     weight_method = 0 # Weight signal and background equally
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
-    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l2_pt']
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta']
     bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
     train_cut = '1'
   if method_id == 1: 
@@ -83,6 +83,110 @@ if __name__ == "__main__":
     features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l2_pt']
     bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
     train_cut = '(lly_m>120)&(lly_m<130)'
+  if method_id == 3: 
+    mva_name = 'xgboost_nowindowcut'
+    train_tree_name = 'train_tree_baseline'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 4: 
+    mva_name = 'xgboost_windowcut'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 5: 
+    mva_name = 'xgboost_yptmass3'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_yptmass3_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 6: 
+    mva_name = 'xgboost_yptmass2'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_yptmass2_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 7: 
+    mva_name = 'xgboost_decorr_cosThetacut'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_cosTheta_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosTheta', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 8: 
+    mva_name = 'xgboost_decorr19'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt', 'leplep_flavor', 'leplep_m', 'leplep_eta', 'lly_ptt', 'lly_eta', 'ht']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 9: 
+    mva_name = 'xgboost_decorr_min19'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'ht']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 10: 
+    mva_name = 'xgboost_decorr_min19bad'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'lly_ptt', 'ht']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 11: 
+    mva_name = 'xgboost_min14_ypt'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'ht', 'y_ptinfo2mass2']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 12: 
+    mva_name = 'xgboost_min13'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 13: 
+    mva_name = 'xgboost_decorr18'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt', 'leplep_flavor', 'leplep_m', 'leplep_eta', 'lly_ptt', 'lly_eta']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 14: 
+    mva_name = 'xgboost_min13_ypt'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'y_ptinfo2mass2']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  if method_id == 15: 
+    mva_name = 'xgboost19'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt', 'leplep_flavor', 'leplep_m', 'leplep_eta', 'lly_ptt', 'lly_eta','y_ptinfo2mass2']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
   print(f'Training XGBoost with method {method_id}, {mva_name}')
 
   start_time = time.time()
