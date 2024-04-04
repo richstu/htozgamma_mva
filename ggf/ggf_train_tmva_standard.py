@@ -97,13 +97,13 @@ if __name__ == "__main__":
   args = parser.parse_args()
   method_id = int(args.method_id)
   if method_id == 0: 
-    bdt_name = 'standard_tmva_bdt'
+    bdt_name = 'standard_tmva_bdtg'
     weight_name = 'weightXyear'
     train_tree_name = 'train_tree'
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']
-    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    bdt_setting = "!H:!V:NTrees=850:MinNodeSize=4%:MaxDepth=4:BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
   elif method_id == 1: 
