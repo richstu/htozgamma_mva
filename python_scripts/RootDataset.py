@@ -34,18 +34,24 @@ class RootDataset(torch.utils.data.Dataset):
     self.label_array = np.array(label_hotencoding, dtype=int)
 
     # remove unlabeled data
-    self.feature_array = self.feature_array[np.sum(self.label_array, axis=1) == 1]
+    self.feature_array = self.feature_array[np.sum(self.label_array, axis=1) == 1] # (batch, features)
     self.spec_array = self.spec_array[np.sum(self.label_array, axis=1) == 1]
     self.label_array = self.label_array[np.sum(self.label_array, axis=1) == 1]
+    self.mask_array = (self.feature_array == -999) # True should not be used. (batch, features)
 
     # normalize
-    # TODO Clip min max
-    if normalize:
-      feat_min = np.amin(self.feature_array,0)
-      feat_max = np.amax(self.feature_array,0)
+    if normalize == True:
       for ifeat, [min_x, max_x] in enumerate(normalize):
+        feat_min = np.amin(self.feature_array[:,ifeat],0)
+        feat_max = np.amax(self.feature_array[:,ifeat],0)
         #print(f'[Info] ifeat[{ifeat}] data min: {feat_min[ifeat]} max: {feat_max[ifeat]} norm min: {min_x} max: {max_x}')
+        self.feature_array[:,ifeat] = 2.*(self.feature_array[:,ifeat]-feat_min)/(feat_max-feat_min) - 1.
+        self.feature_array[:,ifeat] = np.clip(self.feature_array[:,ifeat],-1.,1.)
+    elif normalize:
+      for ifeat, [min_x, max_x] in enumerate(normalize):
+        #print(f'[Info] ifeat[{ifeat}] data min: {min_x} max: {max_x}')
         self.feature_array[:,ifeat] = 2.*(self.feature_array[:,ifeat]-min_x)/(max_x-min_x) - 1.
+        self.feature_array[:,ifeat] = np.clip(self.feature_array[:,ifeat],-1.,1.)
 
     # Split data
     if entry_stop and entry_stop:
@@ -64,9 +70,10 @@ class RootDataset(torch.utils.data.Dataset):
   def __len__(self):
     return len(self.label_array)
 
+  # idx is index of event
   def __getitem__(self, idx):
     #sample = {'feature_array': self.feature_array[idx], 'label_array': self.label_array[idx], 'spec_array': self.spec_array[idx]}
-    sample = [self.feature_array[idx], self.label_array[idx], self.spec_array[idx]]
+    sample = [self.feature_array[idx], self.label_array[idx], self.spec_array[idx], self.mask_array[idx]]
     if self.transform:
       sample = self.transform(sample)
     return sample

@@ -52,7 +52,13 @@ def combine_ntuples(class_filenames):
 
   return output_ntuple, output_branches
 
-def split_ntuple(ntuple, branches, baseline_cut, train_cut, weight_branch_names, output_filename):
+def split_ntuple(ntuple_filename, ntuple_treename, baseline_cut, train_cut, sampleID_branch_name, sampleIDs, weight_branch_names, output_filename):
+  # Open ntuple from ROOT file
+  ntuple_tree = uproot.open(ntuple_filename)[ntuple_treename]
+  branches = [branch for branch in ntuple_tree.keys()]
+  # Apply baseline cut first, which will help in scaling weights to match the same number of expected events
+  ntuple = ntuple_tree.arrays(branches, baseline_cut, library='np')
+
   # Split ntuple into trees using event number
   train_ntuple, eval_ntuple, test_ntuple = {}, {}, {}
   train_idx = (ntuple['event_number']%314159%3==0) 
@@ -66,12 +72,43 @@ def split_ntuple(ntuple, branches, baseline_cut, train_cut, weight_branch_names,
   train_ntuples = np.stack([np.squeeze(train_ntuple[feat]) for feat in branches], axis=1)
   eval_ntuples = np.stack([np.squeeze(eval_ntuple[feat]) for feat in branches], axis=1)
   test_ntuples = np.stack([np.squeeze(test_ntuple[feat]) for feat in branches], axis=1)
-
-  train_fraction = len(train_ntuples)*1./n_entries
-  eval_fraction = len(eval_ntuples)*1./n_entries
-  test_fraction = len(test_ntuples)*1./n_entries
   print(f'Total entries: {n_entries} train entries: {len(train_ntuples)}, eval entries: {len(eval_ntuples)}, test entries: {len(test_ntuples)}')
-  print(f'  train fraction: {train_fraction:.2f}, val. fraction:{eval_fraction:.2f}, test fraction:{test_fraction:.2f}')
+
+  ## Scale up weights inclusively
+  #train_fraction = len(train_ntuples)*1./n_entries
+  #eval_fraction = len(eval_ntuples)*1./n_entries
+  #test_fraction = len(test_ntuples)*1./n_entries
+  #print(f'  train fraction: {train_fraction:.4f}, val. fraction:{eval_fraction:.4f}, test fraction:{test_fraction:.4f}')
+  #for weight_branch_name in weight_branch_names:
+  #  weight_branch_index = branches.index(weight_branch_name)
+  #  train_ntuples[:,weight_branch_index] = train_ntuples[:,weight_branch_index] / train_fraction
+  #  test_ntuples[:,weight_branch_index] = test_ntuples[:,weight_branch_index] / test_fraction
+  #  eval_ntuples[:,weight_branch_index] = eval_ntuples[:,weight_branch_index] / eval_fraction
+
+  # Scales up weights according to sample using sum of weights
+  sampleID_branch_index = branches.index(sampleID_branch_name)
+  for weight_branch_name in weight_branch_names:
+    weight_branch_index = branches.index(weight_branch_name)
+    for sampleID in sampleIDs:
+      train_sampleID_mask = train_ntuples[:,sampleID_branch_index]==sampleID
+      #sample_train_events = len(train_ntuples[train_sampleID_mask])
+      sample_train_events = np.sum(train_ntuples[train_sampleID_mask,weight_branch_index])
+      eval_sampleID_mask = eval_ntuples[:,sampleID_branch_index]==sampleID
+      #sample_eval_events = len(eval_ntuples[eval_sampleID_mask])
+      sample_eval_events = np.sum(eval_ntuples[eval_sampleID_mask,weight_branch_index])
+      test_sampleID_mask = test_ntuples[:,sampleID_branch_index]==sampleID
+      #sample_test_events = len(test_ntuples[test_sampleID_mask])
+      sample_test_events = np.sum(test_ntuples[test_sampleID_mask,weight_branch_index])
+      sample_inclusive_events = sample_train_events + sample_eval_events + sample_test_events
+      sample_train_fraction = sample_train_events*1./sample_inclusive_events
+      sample_eval_fraction = sample_eval_events*1./sample_inclusive_events
+      sample_test_fraction = sample_test_events*1./sample_inclusive_events
+      print(f'weight branch: {weight_branch_name}, sampleID: {sampleID} train entries: {sample_train_events}, val. entries: {sample_eval_events}, test entries: {sample_test_events}')
+      print(f'  sampleID: {sampleID} train fraction: {sample_train_fraction:.4f}, val. fraction: {sample_eval_fraction:.4f}, test fraction: {sample_test_fraction:.4f}')
+      train_ntuples[train_sampleID_mask,weight_branch_index] = train_ntuples[train_sampleID_mask,weight_branch_index] / sample_train_fraction
+      eval_ntuples[eval_sampleID_mask,weight_branch_index] = eval_ntuples[eval_sampleID_mask,weight_branch_index] / sample_eval_fraction
+      test_ntuples[test_sampleID_mask,weight_branch_index] = test_ntuples[test_sampleID_mask,weight_branch_index] / sample_test_fraction
+
 
   ## Split the ntuples (Alternative method)
   #train_fraction = 0.34
@@ -86,13 +123,6 @@ def split_ntuple(ntuple, branches, baseline_cut, train_cut, weight_branch_names,
   #eval_ntuples = stack_ntuple[train_n_entries:train_n_entries+eval_n_entries]
   #test_ntuples = stack_ntuple[train_n_entries+eval_n_entries:]
   #print(f'Total entries: {n_entries} train entries: {len(train_ntuples)}, test entries: {len(test_ntuples)}, eval entries: {len(eval_ntuples)}')
-
-  # Scale up weights
-  for weight_branch_name in weight_branch_names:
-    weight_branch_index = branches.index(weight_branch_name)
-    train_ntuples[:,weight_branch_index] = train_ntuples[:,weight_branch_index] / train_fraction
-    test_ntuples[:,weight_branch_index] = test_ntuples[:,weight_branch_index] / test_fraction
-    eval_ntuples[:,weight_branch_index] = eval_ntuples[:,weight_branch_index] / eval_fraction
 
   # Create the ntuples and tmp file
   out_train_ntuples = {}
@@ -139,7 +169,13 @@ def split_ntuple(ntuple, branches, baseline_cut, train_cut, weight_branch_names,
   print('Tree saved to '+output_filename)
   in_file.close()
 
-def split_ntuple_train_eval(ntuple, branches, baseline_cut, train_cut, weight_branch_names, output_filename):
+def split_ntuple_train_eval(ntuple_filename, ntuple_treename, baseline_cut, train_cut, sampleID_branch_name, sampleIDs, weight_branch_names, output_filename):
+  # Open ntuple from ROOT file
+  ntuple_tree = uproot.open(ntuple_filename)[ntuple_treename]
+  branches = [branch for branch in ntuple_tree.keys()]
+  # Apply baseline cut first, which will help in scaling weights to match the same number of expected events
+  ntuple = ntuple_tree.arrays(branches, baseline_cut, library='np')
+
   # Split ntuple into trees using event number
   train_ntuple, eval_ntuple, test_ntuple = {}, {}, {}
   train_idx = (ntuple['event_number']%314159%2==0) 
@@ -150,11 +186,6 @@ def split_ntuple_train_eval(ntuple, branches, baseline_cut, train_cut, weight_br
   n_entries = len(ntuple['event_number'])
   train_ntuples = np.stack([np.squeeze(train_ntuple[feat]) for feat in branches], axis=1)
   eval_ntuples = np.stack([np.squeeze(eval_ntuple[feat]) for feat in branches], axis=1)
-
-  train_fraction = len(train_ntuples)*1./n_entries
-  eval_fraction = len(eval_ntuples)*1./n_entries
-  print(f'Total entries: {n_entries} train entries: {len(train_ntuples)}, eval entries: {len(eval_ntuples)}')
-  print(f'  train fraction: {train_fraction:.2f}, val. fraction:{eval_fraction:.2f}')
 
   ## Split the ntuples (Alternative method)
   #train_fraction = 0.34
@@ -170,17 +201,39 @@ def split_ntuple_train_eval(ntuple, branches, baseline_cut, train_cut, weight_br
   #test_ntuples = stack_ntuple[train_n_entries+eval_n_entries:]
   #print(f'Total entries: {n_entries} train entries: {len(train_ntuples)}, test entries: {len(test_ntuples)}, eval entries: {len(eval_ntuples)}')
 
-  # Scale up weights
+  ## Scale up weights inclusively
+  #train_fraction = len(train_ntuples)*1./n_entries
+  #eval_fraction = len(eval_ntuples)*1./n_entries
+  #print(f'Total entries: {n_entries} train entries: {len(train_ntuples)}, eval entries: {len(eval_ntuples)}')
+  #print(f'  train fraction: {train_fraction:.2f}, val. fraction:{eval_fraction:.2f}')
+  #for weight_branch_name in weight_branch_names:
+  #  weight_branch_index = branches.index(weight_branch_name)
+  #  train_ntuples[:,weight_branch_index] = train_ntuples[:,weight_branch_index] / train_fraction
+  #  eval_ntuples[:,weight_branch_index] = eval_ntuples[:,weight_branch_index] / eval_fraction
+
+  # Scales up weights according to sample using sum of weights
+  sampleID_branch_index = branches.index(sampleID_branch_name)
   for weight_branch_name in weight_branch_names:
     weight_branch_index = branches.index(weight_branch_name)
-    train_ntuples[:,weight_branch_index] = train_ntuples[:,weight_branch_index] / train_fraction
-    eval_ntuples[:,weight_branch_index] = eval_ntuples[:,weight_branch_index] / eval_fraction
+    for sampleID in sampleIDs:
+      train_sampleID_mask = train_ntuples[:,sampleID_branch_index]==sampleID
+      #sample_train_events = len(train_ntuples[train_sampleID_mask])
+      sample_train_events = np.sum(train_ntuples[train_sampleID_mask,weight_branch_index])
+      eval_sampleID_mask = eval_ntuples[:,sampleID_branch_index]==sampleID
+      sample_eval_events = np.sum(eval_ntuples[eval_sampleID_mask,weight_branch_index])
+      sample_inclusive_events = sample_train_events + sample_eval_events
+      sample_train_fraction = sample_train_events*1./sample_inclusive_events
+      sample_eval_fraction = sample_eval_events*1./sample_inclusive_events
+      print(f'weight branch: {weight_branch_name}, sampleID: {sampleID} train entries: {sample_train_events}, val. entries: {sample_eval_events}')
+      print(f'  sampleID: {sampleID} train fraction: {sample_train_fraction:.4f}, val. fraction: {sample_eval_fraction:.4f}')
+      train_ntuples[train_sampleID_mask,weight_branch_index] = train_ntuples[train_sampleID_mask,weight_branch_index] / sample_train_fraction
+      eval_ntuples[eval_sampleID_mask,weight_branch_index] = eval_ntuples[eval_sampleID_mask,weight_branch_index] / sample_eval_fraction
 
   # Create the ntuples and tmp file
   out_train_ntuples = {}
   out_eval_ntuples = {}
   for ibranch, branch in enumerate(branches):
-    if branch == 'classID':
+    if branch == 'classID' or branch == 'sampleID':
       out_train_ntuples[branch] = np.int32(train_ntuples[:,ibranch])
       out_eval_ntuples[branch] = np.int32(eval_ntuples[:,ibranch])
     else:

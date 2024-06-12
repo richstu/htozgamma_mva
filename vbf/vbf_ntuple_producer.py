@@ -31,9 +31,9 @@ def write_ntuples(filenames, cuts, out_name, defines=[], tree_name='tree', branc
   for cut in cuts:
     df = df.Filter(cut)
   if (branches == ()):
-    df.Snapshot(tree_name,'ntuples/'+out_name)
+    df.Snapshot(tree_name,'./ntuples/'+out_name)
   else:
-    df.Snapshot(tree_name,'ntuples/'+out_name,branches)
+    df.Snapshot(tree_name,'./ntuples/'+out_name,branches)
   print('Wrote ntuples/'+out_name)
 
 ROOT.gInterpreter.Declare("""
@@ -418,65 +418,6 @@ float pTt_funcVec(RVec<float> ll_pt, RVec<float> ll_eta, RVec<float> ll_phi,RVec
     return fabs( (Z+y).Vect().Cross( (Z-y).Vect() ).Pz()/( (Z+y).Pt() ) );
 }
 
-float get_weight(float w_lumi ,float w_year){//RVec<float> llphoton_l1_masserr,RVec<float> llphoton_l2_masserr,RVec<float> llphoton_ph_masserr, float weight, bool isNotSig){
-  float dm = 1.0;
-  /*if(isNotSig){dm=1;} else {
-  float dml1,dml2,dmph;
-  dml1 = llphoton_l1_masserr[0];
-  dml2 = llphoton_l2_masserr[0];
-  dmph = llphoton_ph_masserr[0];
-  dm = sqrt(dml1 * dml1 + dml2 * dml2 + dmph * dmph);
-  }*/
-
-  //return weight;
-  //if(SampleType == 2016) { return w_lumi*36.32264/dm;}
-  //if(SampleType == 2017) { return w_lumi*41.52756/dm;}
-  //if(SampleType == 2018) { return w_lumi*59.67377/dm;}
-  //return weight/dm;
-  return w_year*w_lumi;
-  }
-
-bool signal_lead_electron_pt(RVec<float> el_pt, RVec<float> el_sig){
-  for (unsigned iPart = 0; iPart<el_pt.size(); iPart++) {
-    if (el_sig.at(iPart)) {
-      return (el_pt.at(iPart) > 25);
-    }
-  }
-  return false;
-}
-
-bool signal_sublead_electron_pt(RVec<float> el_pt, RVec<float> el_sig){
-  bool sublead = false;
-  for (unsigned iPart = 0; iPart<el_pt.size(); iPart++) {
-    if (el_sig.at(iPart)) {
-      if (sublead == false) sublead = true;
-      else return (el_pt.at(iPart) > 15);
-    }
-  }
-  return false;
-}
-
-
-bool signal_lead_muon_pt(RVec<float> mu_pt, RVec<float> mu_sig){
-  for (unsigned iPart = 0; iPart<mu_pt.size(); iPart++) {
-    if (mu_sig.at(iPart)) {
-      return (mu_pt.at(iPart) > 20);
-    }
-  }
-  return false;
-}
-
-bool signal_sublead_muon_pt(RVec<float> mu_pt, RVec<float> mu_sig){
-  bool sublead = false;
-  for (unsigned iPart = 0; iPart<mu_pt.size(); iPart++) {
-    if (mu_sig.at(iPart)) {
-      if (sublead == false) sublead = true;
-        else return (mu_pt.at(iPart) > 10);
-    }
-  }
-  return false;
-}
-
 double j_pt(RVec<float>jet_pt,RVec<float> jet_isgood,int which=0){
   int count=0;
   for(unsigned iPart = 0; iPart<jet_pt.size(); iPart++){
@@ -536,8 +477,6 @@ bool get_trigger(RVec<int> ll_lepid,
 
   return ((trigs_mu_pT&&nmu>=2&&ll_lepid.at(0)==13) || (trigs_el_pT&&nel>=2&&ll_lepid.at(0)==11));
 }
-
-
 
 float get_luminosity(unsigned int slot, const ROOT::RDF::RSampleInfo &id) {
   float luminosity = 0;
@@ -756,9 +695,11 @@ float get_zeppenfeld_system(RVec<float>jet_eta,RVec<float>jet_isgood,RVec<float>
     }
   }
   if (sublead_eta > -999) {
-    double zeppenfeld = (llphoton_eta.at(0) - (lead_eta + sublead_eta)/2)/fabs(lead_eta - sublead_eta);
+    double denom = fabs(lead_eta - sublead_eta);
+    //if (denom<0.0001) denom = 0.0001;
+    double zeppenfeld = (llphoton_eta.at(0) - (lead_eta + sublead_eta)/2)/denom;
     if (zeppenfeld>30) zeppenfeld = 30;
-    else if (zeppenfeld<-30) zeppenfeld = 30;
+    else if (zeppenfeld<-30) zeppenfeld = -30;
     return zeppenfeld;
   } else return -999;
 }
@@ -778,9 +719,11 @@ float get_zeppenfeld_pt_system(RVec<float>jet_pt,RVec<float>jet_isgood,RVec<floa
     }
   }
   if (sublead_pt > -999) {
-    double pt_balance = (llphoton_pt.at(0) - (lead_pt + sublead_pt)/2)/fabs(lead_pt - sublead_pt);
+    double denom = fabs(lead_pt - sublead_pt);
+    //if (denom<0.0001) denom = 0.0001;
+    double pt_balance = (llphoton_pt.at(0) - (lead_pt + sublead_pt)/2)/denom;
     if (pt_balance>30) pt_balance = 30;
-    else if (pt_balance<-30) pt_balance = 30;
+    else if (pt_balance<-30) pt_balance = -30;
     return pt_balance;
   } else return -999;
 }
@@ -836,7 +779,7 @@ if __name__=='__main__':
            ('j1_eta','get_j1_eta(njet,jet_isgood,jet_eta)'),
            ('j2_eta','get_j2_eta(njet,jet_isgood,jet_eta)'),
 
-           # Misc. variables
+           # POI
            ('lly_m','llphoton_m[0]'),
            ('l1_phi','get_l1_phi(el_pt,el_phi,mu_pt,mu_phi,ll_lepid,ll_i1,ll_i2)'),
            ('l2_phi','get_l2_phi(el_pt,el_phi,mu_pt,mu_phi,ll_lepid,ll_i1,ll_i2)'),
@@ -884,7 +827,7 @@ if __name__=='__main__':
   branches.extend(['lly_pt','lly_eta','lly_phi'])
   branches.extend(['j1_phi','j2_phi','j1_m','j2_m'])
   branches.extend(['tm_jets','tru_leplep_m'])
-  branches.extend(['nlep','nbdfm'])
+  branches.extend(['nlep','nbdfm', 'nllphoton'])
   # Event variables
   branches.extend(['year', 'luminosity', 'w_lumiXyear', 'weightXyear', 'type', 'pass_filter','event_number', 'trigger', 'use_event'])
   ## Experimental variables
@@ -892,13 +835,13 @@ if __name__=='__main__':
   #           ('kinMVA','getMVA(photon_mva,min_dR,max_dR,pt_mass,cosTheta,costheta,phi,photon_res,photon_prap,l1_rapidity,l2_rapidity)'),
 
   #make n-tuples
-  cuts = ['trigger', 'pass_filter', 'llphoton_m.size()>0 && photon_pt.size()>0',
-          'use_event', 'leplep_m>50', 'njet>=2']
+  cuts = ['trigger', 'pass_filter', 'nllphoton>=1',
+          'use_event']
 
   names = 'vbf_ntuples'
   base_dir  = '/net/cms11/cms11r0/pico/NanoAODv9/htozgamma_kingscanyon_v1/'
   pico_type = '/mc/merged_zgmc_llg/'
-  sig_samples = ['*GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root','*VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root']                              
+  sig_samples = ['*GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root','*VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root']
   bkg_samples = ['*ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*ZGamma2JToGamma2L2J_EWK_MLL-50_MJJ-120_TuneCP5_13TeV-madgraph-pythia8*.root']
   print([base_dir + year + pico_type + sig for sig in sig_samples for year in years])
   print([base_dir + year + pico_type  + bkg for bkg in bkg_samples for year in years])

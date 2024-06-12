@@ -64,7 +64,7 @@ def tmva_shap_importance(root_filename, tree_name, features, tmva_name, tmva_wei
   shap_values = explainer(input_ntuple[:nevents])
   # Make shap bar plot
   plt.figure(1)
-  plt_ax = shap.plots.bar(shap_values, show=False, max_display=20)
+  plt_ax = shap.plots.bar(shap_values, show=False, max_display=len(features))
   # Change y axis label names
   y_labels = plt_ax.get_yticklabels()
   for y_label in y_labels:
@@ -77,7 +77,7 @@ def tmva_shap_importance(root_filename, tree_name, features, tmva_name, tmva_wei
   print(f'Plot saved to {figure_name}')
   # Make shap bee plot
   plt.figure(2)
-  plt_ax = shap.plots.beeswarm(shap_values, show=False, max_display=20)
+  plt_ax = shap.plots.beeswarm(shap_values, show=False, max_display=len(features))
   # Change y axis label names
   y_labels = plt_ax.get_yticklabels()
   for y_label in y_labels:
@@ -96,22 +96,32 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
   method_id = int(args.method_id)
-  if method_id == 0: 
-    bdt_name = 'standard_tmva_bdt'
-    weight_name = 'weightXyear'
-    train_tree_name = 'train_tree'
-    eval_tree_name = 'eval_tree'
-    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
-    features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']
-    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
-    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
-    train_cut = '1'
-  elif method_id == 1: 
+  if method_id == 1: 
     bdt_name = 'standard_tmva_bdt_hig19014'
     weight_name = 'weightXyear'
     train_tree_name = 'train_tree_baseline'
     eval_tree_name = 'eval_tree_baseline'
     input_mva_ntuple = 'ntuples/vbf_mva_hig19014_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  elif method_id == 2: 
+    bdt_name = 'standard_tmva_bdt_hig19014_allvars'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree_baseline'
+    eval_tree_name = 'eval_tree_baseline'
+    input_mva_ntuple = 'ntuples/vbf_mva_hig19014_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  elif method_id == 3: 
+    bdt_name = 'standard_tmva_bdt'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"

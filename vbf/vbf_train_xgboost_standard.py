@@ -28,7 +28,7 @@ def xgboost_shap_importance(root_filename, tree_name, features, xgboost_predict,
   shap_values = explainer(feature_array[:nevents])
   # Make shap bar plot
   plt.figure(1)
-  plt_ax = shap.plots.bar(shap_values, show=False, max_display=20)
+  plt_ax = shap.plots.bar(shap_values, show=False, max_display=len(features))
   # Change y axis label names
   y_labels = plt_ax.get_yticklabels()
   for y_label in y_labels:
@@ -41,7 +41,7 @@ def xgboost_shap_importance(root_filename, tree_name, features, xgboost_predict,
   print(f'Plot saved to {figure_name}')
   # Make shap bee plot
   plt.figure(2)
-  plt_ax = shap.plots.beeswarm(shap_values, show=False, max_display=20)
+  plt_ax = shap.plots.beeswarm(shap_values, show=False, max_display=len(features))
   # Change y axis label names
   y_labels = plt_ax.get_yticklabels()
   for y_label in y_labels:
@@ -59,19 +59,27 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
   method_id = int(args.method_id)
-  if method_id == 0: 
-    mva_name = 'standard_xgboost'
-    train_tree_name = 'train_tree'
-    weight_method = 0 # Weight signal and background equally
-    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
-    features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']
-    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
-    train_cut = '1'
-  elif method_id == 1: 
+  if method_id == 1: 
     mva_name = 'standard_xgboost_hig19014'
     weight_method = 0 # Weight signal and background equally
     train_tree_name = 'train_tree_baseline'
     input_mva_ntuple = 'ntuples/vbf_mva_hig19014_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 2: 
+    mva_name = 'standard_xgboost_hig19014_allvars'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree_baseline'
+    input_mva_ntuple = 'ntuples/vbf_mva_hig19014_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 3: 
+    mva_name = 'standard_xgboost'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep']
     bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
     train_cut = '1'
@@ -158,7 +166,7 @@ if __name__ == "__main__":
     output_dict['yhat'] = eval_predict_array_xgbdt
     output_dict['mass'] = eval_mass_array
     output_dict['weight'] = eval_weight_array
-    output_dict['w_lumi'] = eval_weight_array
+    output_dict['w_lumi'] = eval_w_lumi_array
     output_dict['sampleID'] = eval_sampleID_array
 
     # Save to root file

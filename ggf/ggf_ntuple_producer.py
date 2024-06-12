@@ -287,6 +287,66 @@ float get_j1_phi(int njet, RVec<int> jet_isgood, RVec<float> jet_phi){
   }
   return -999;
 }
+float get_llyj_dphi(float llphoton_phi, int njet, RVec<int> jet_isgood, RVec<float> jet_phi){
+  if (njet<1) return -999;
+  float signal_jet_phi = -999;
+  for (unsigned iPart = 0; iPart<jet_phi.size(); iPart++) {
+      if (jet_isgood.at(iPart)) {
+        signal_jet_phi = jet_phi.at(iPart);
+        break;
+      }
+  }
+  if (signal_jet_phi<-998) return signal_jet_phi;
+  float dphi_lead = TVector2::Phi_mpi_pi(llphoton_phi - signal_jet_phi);
+  return dphi_lead;
+}
+float get_yj1_deta(float photon_eta, int njet, RVec<int> jet_isgood, RVec<float> jet_eta){
+  if (njet<1) return -999;
+  float signal_jet_eta = -999;
+  for (unsigned iPart = 0; iPart<jet_eta.size(); iPart++) {
+      if (jet_isgood.at(iPart)) {
+        signal_jet_eta = jet_eta.at(iPart);
+        break;
+      }
+  }
+  if (signal_jet_eta<-998) return signal_jet_eta;
+  float deta_lead = photon_eta - signal_jet_eta;
+  return deta_lead;
+}
+float get_yj1_dr(float photon_eta, float photon_phi, int njet, RVec<int> jet_isgood, RVec<float> jet_eta, RVec<float> jet_phi){
+  if (njet<1) return -999;
+  float signal_jet_eta = -999;
+  float signal_jet_phi = -999;
+  for (unsigned iPart = 0; iPart<jet_eta.size(); iPart++) {
+      if (jet_isgood.at(iPart)) {
+        signal_jet_eta = jet_eta.at(iPart);
+        signal_jet_phi = jet_phi.at(iPart);
+        break;
+      }
+  }
+  if (signal_jet_eta<-998) return signal_jet_eta;
+  return get_dr(photon_eta, photon_phi, signal_jet_eta, signal_jet_phi);
+}
+float get_llyj1_ptbal(float ll_pt, float ll_eta, float ll_phi, float photon_pt, float photon_eta, float photon_phi, int njet, RVec<int> jet_isgood, RVec<float> jet_pt, RVec<float> jet_eta, RVec<float> jet_phi){
+  if (njet<1) return -999;
+  float signal_jet_eta = -999;
+  float signal_jet_phi = -999;
+  float signal_jet_pt = -999;
+  for (unsigned iPart = 0; iPart<jet_eta.size(); iPart++) {
+      if (jet_isgood.at(iPart)) {
+        signal_jet_pt = jet_pt.at(iPart);
+        signal_jet_eta = jet_eta.at(iPart);
+        signal_jet_phi = jet_phi.at(iPart);
+        break;
+      }
+  }
+  if (signal_jet_eta<-998) return signal_jet_eta;
+  TVector3 zboson; zboson.SetPtEtaPhi(ll_pt, ll_eta, ll_phi);
+  TVector3 gamma; gamma.SetPtEtaPhi(photon_pt, photon_eta, photon_phi);
+  TVector3 jet; jet.SetPtEtaPhi(signal_jet_pt, signal_jet_eta, signal_jet_phi);
+  return (zboson+gamma+jet).Pt()/(zboson.Pt()+gamma.Pt()+jet.Pt());
+}
+
 
 float get_j2_pt(int njet, RVec<int> jet_isgood, RVec<float> jet_pt){
   if (njet<2) return -999;
@@ -349,6 +409,7 @@ if __name__=='__main__':
   start_time = time.time()
  
   years = ["2016APV","2016","2017","2018"]
+  #years = ["2016"]
 
   #make n-tuples
   defines = [
@@ -391,12 +452,17 @@ if __name__=='__main__':
        ('lly_pt','llphoton_pt[0]'),
        ('lly_eta','llphoton_eta[0]'),
        ('lly_phi','llphoton_phi[0]'),
-       ('j1_pt','get_j1_pt(njet,jet_isgood, jet_pt)'),
-       ('j1_eta','get_j1_eta(njet,jet_isgood, jet_eta)'),
-       ('j1_phi','get_j1_phi(njet,jet_isgood, jet_phi)'),
        ('lly_ptt', 'get_llg_ptt(photon_pt, photon_eta, photon_phi, llphoton_pt, llphoton_eta, llphoton_phi, ll_pt, ll_eta, ll_phi)'),
        ('tru_leplep_m', 'get_tru_leplep_m(mc_id,mc_status,mc_mom,mc_pt,mc_eta,mc_phi,mc_mass)'),
        ('event_number','event'),
+       ('j1_pt','get_j1_pt(njet,jet_isgood, jet_pt)'),
+       ('j1_eta','get_j1_eta(njet,jet_isgood, jet_eta)'),
+       ('j1_phi','get_j1_phi(njet,jet_isgood, jet_phi)'),
+       ('llyj_dphi', 'get_llyj_dphi(llphoton_phi[0], njet, jet_isgood, jet_phi)'),
+       ('yj1_deta', 'get_yj1_deta(photon_eta[0], njet, jet_isgood, jet_eta)'),
+       ('yj1_dr', 'get_yj1_dr(photon_eta[0], photon_phi[0], njet, jet_isgood, jet_eta, jet_phi)'),
+       ('llyj1_ptbal', 'get_llyj1_ptbal(ll_pt[0], ll_eta[0], ll_phi[0], photon_pt[0], photon_eta[0], photon_phi[0], njet, jet_isgood, jet_pt, jet_eta, jet_phi)'),
+       ('lly_res', 'sqrt(llphoton_l1_masserr[0]*llphoton_l1_masserr[0]+llphoton_l2_masserr[0]*llphoton_l2_masserr[0]+llphoton_ph_masserr[0]*llphoton_ph_masserr[0])'),
        ]
  
   # Select only the needed branches to reduce space
@@ -404,19 +470,20 @@ if __name__=='__main__':
   branches.extend(['lly_m','l1_pt','l2_pt','l1_phi','l2_phi','y_phi','y_id80'])
   branches.extend(['leplep_pt','leplep_eta','leplep_phi','leplep_m','leplep_flavor'])
   branches.extend(['lly_pt','lly_eta','lly_phi','lly_ptt'])
-  branches.extend(['met','j1_pt','j1_eta','j1_phi', 'njet', 'nlep'])
+  branches.extend(['met','nlep', 'nllphoton', 'npv', 'lly_res'])
+  branches.extend(['j1_pt','j1_eta','j1_phi', 'njet', 'llyj_dphi', 'yj1_deta', 'yj1_dr', 'llyj1_ptbal'])
   branches.extend(['tru_leplep_m'])
   branches.extend(['year', 'luminosity', 'w_lumiXyear', 'weightXyear', 'type', 'pass_filter','event_number', 'trigger', 'use_event'])
 
   #make n-tuples
-  cuts = ['trigger', 'pass_filter', 'llphoton_m.size()>0 && photon_pt.size()>0',
-          'use_event', 'leplep_m>50']
+  cuts = ['trigger', 'pass_filter', 'nllphoton>=1',
+          'use_event']
 
   names = 'ggf_ntuples'
   base_dir  = '/net/cms11/cms11r0/pico/NanoAODv9/htozgamma_kingscanyon_v1/'
   pico_type = '/mc/merged_zgmc_llg/'
-  sig_samples = ['*GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root']
-  bkg_samples = ['*ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root']
+  sig_samples = ['*GluGluHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root','*VBFHToZG_ZToLL_M-125_TuneCP5_13TeV-powheg-pythia8*.root']
+  bkg_samples = ['*ZGToLLG_01J_5f_lowMLL_lowGPt_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8*.root','*ZGamma2JToGamma2L2J_EWK_MLL-50_MJJ-120_TuneCP5_13TeV-madgraph-pythia8*.root']
   print([base_dir + year + pico_type + sig for sig in sig_samples for year in years])
   print([base_dir + year + pico_type  + bkg for bkg in bkg_samples for year in years])
 

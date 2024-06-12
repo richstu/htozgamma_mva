@@ -28,12 +28,15 @@ def xgboost_shap_importance(root_filename, tree_name, features, xgboost_predict,
   shap_values = explainer(feature_array[:nevents])
   # Make shap bar plot
   plt.figure(1)
-  plt_ax = shap.plots.bar(shap_values, show=False, max_display=20)
+  plt_ax = shap.plots.bar(shap_values, show=False, max_display=len(features))
   # Change y axis label names
   y_labels = plt_ax.get_yticklabels()
   for y_label in y_labels:
-    label_index = int(y_label.get_text().replace('Feature ',''))
-    y_label.set_text(features[label_index])
+    if y_label.get_text().replace('Feature ','').isdigit(): 
+      label_index = int(y_label.get_text().replace('Feature ',''))
+      y_label.set_text(features[label_index])
+    else:
+      y_label.set_text(y_label.get_text())
   plt_ax.set_yticklabels(y_labels)
   # Save plot
   figure_name = f'plots/{output_tag}_shap.pdf'
@@ -41,12 +44,15 @@ def xgboost_shap_importance(root_filename, tree_name, features, xgboost_predict,
   print(f'Plot saved to {figure_name}')
   # Make shap bee plot
   plt.figure(2)
-  plt_ax = shap.plots.beeswarm(shap_values, show=False, max_display=20)
+  plt_ax = shap.plots.beeswarm(shap_values, show=False, max_display=len(features))
   # Change y axis label names
   y_labels = plt_ax.get_yticklabels()
   for y_label in y_labels:
-    label_index = int(y_label.get_text().replace('Feature ',''))
-    y_label.set_text(features[label_index])
+    if y_label.get_text().replace('Feature ','').isdigit(): 
+      label_index = int(y_label.get_text().replace('Feature ',''))
+      y_label.set_text(features[label_index])
+    else:
+      y_label.set_text(y_label.get_text())
   plt_ax.set_yticklabels(y_labels)
   # Save plot
   figure_name = f'plots/{output_tag}_shap_bee.pdf'
@@ -59,13 +65,117 @@ if __name__ == "__main__":
 
   args = parser.parse_args()
   method_id = int(args.method_id)
-  if method_id == 0: 
-    mva_name = 'xgboost_decorr'
+  if method_id == 1: 
+    mva_name = 'xgboost_tight_widetrain'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree_baseline'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 2: 
+    mva_name = 'xgboost_tight'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 3: 
+    mva_name = 'xgboost_othervar'
     train_tree_name = 'train_tree'
     weight_method = 0 # Weight signal and background equally
-    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
-    features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l2_pt']
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep', 'lly_ptmass', 'yj_drmin', 'llyj_dphimin', 'lly_eta', 'jj_m', 'llyjj_zep', 'llyjj_zeppt'] 
     bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 4: 
+    mva_name = 'xgboost_tight_tree300d3'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':300, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 5: 
+    mva_name = 'xgboost_tight_tree200d3'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':200, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 6: 
+    mva_name = 'xgboost_tight_tree100d3'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':100, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 7: 
+    mva_name = 'xgboost_tight_tree25d3'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':25, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 8: 
+    mva_name = 'xgboost_tight_tree50d3'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':50, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 9: 
+    mva_name = 'xgboost_tight_tree400d3'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':400, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 10: 
+    mva_name = 'xgboost_tight_tree500d3'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 11: 
+    mva_name = 'xgboost_tight_tree10d3'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':10, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 12: 
+    mva_name = 'xgboost_tight_tree600d3'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':600, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 13: 
+    mva_name = 'xgboost_trainvalidation_tight'
+    weight_method = 0 # Weight signal and background equally
+    train_tree_name = 'train_tree'
+    input_mva_ntuple = 'ntuples/vbf_mva_trainvalidation_decorr_ntuples.root'
+    features = ['jj_deta', 'jj_dphi', 'yjj_zep', 'llyjj_ptbal', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'lly_ptt', 'yj1_dr', 'yj2_dr', 'ggf_bdt']
+    bdt_settings = {'max_depth':4, 'learning_rate':0.1, 'n_estimators':500, 'min_child_weight':5}
+    train_cut = '1'
+  elif method_id == 14: 
+    mva_name = 'xgboost_tight_higwindow_var27'
+    train_tree_name = 'train_tree'
+    weight_method = 0 # Weight signal and background equally
+    input_mva_ntuple = 'ntuples/vbf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'lly_ptt', 'jj_deta', 'jj_dphi', 'yj1_dr', 'yj2_dr', 'llyjj_dphi', 'j1_pt', 'j2_pt', 'llyjj_ptbal', 'yjj_zep', 'yj_drmin', 'llyj_dphimin', 'lly_eta', 'jj_m', 'llyjj_zep', 'llyjj_zeppt']
+    bdt_settings = {'max_depth':3, 'learning_rate':0.1, 'n_estimators':200, 'min_child_weight':5}
     train_cut = '1'
   print(f'Training XGBoost with method {method_id}, {mva_name}')
 
@@ -104,8 +214,8 @@ if __name__ == "__main__":
 
   nlabels = train_hot_label_array.shape[1]
 
-  # Train xgboost
-  print("Training xgboost")
+  ## Train xgboost
+  #print("Training xgboost")
   xgbdt_classifier = xgboost.XGBClassifier(**bdt_settings)
   xgbdt_classifier.fit(train_feature_array, train_hot_label_array[:,nlabels-1], sample_weight=train_weight_array)
 

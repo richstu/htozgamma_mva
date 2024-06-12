@@ -172,6 +172,17 @@ class infer_tmva_c {
       }
       return results;
     }
+    float infer(vector<double> input_ntuple) {
+      float result;
+      // Update input store
+      for (unsigned ivar=0; ivar<m_tmva_variables.size(); ivar++)  {
+        string variable_name = m_variable_names[ivar];
+        m_input_store[variable_name] = input_ntuple[ivar];
+      }
+      // Infer
+      result = m_tmva_reader->EvaluateMVA(m_tmva_name);
+      return result;
+    }
 };
 
 // input_ntuple = [ [features values for event], next event, ...]

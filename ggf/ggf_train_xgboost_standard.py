@@ -158,7 +158,7 @@ if __name__ == "__main__":
     output_dict['yhat'] = eval_predict_array_xgbdt
     output_dict['mass'] = eval_mass_array
     output_dict['weight'] = eval_weight_array
-    output_dict['w_lumi'] = eval_weight_array
+    output_dict['w_lumi'] = eval_w_lumi_array
     output_dict['sampleID'] = eval_sampleID_array
 
     # Save to root file

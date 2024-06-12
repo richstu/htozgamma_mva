@@ -7,6 +7,7 @@ import os
 import matplotlib.pyplot as plt
 import sklearn.metrics
 import uproot
+import copy
 
 import unicodedata
 import re
@@ -30,6 +31,8 @@ def new_canvas(name = "", size = 500):
 
 def normalize_hist(hist):
   sum_weight = hist.GetSumOfWeights()
+  if sum_weight <=0:
+    sum_weight = 1.
   hist.Scale(1/sum_weight)
 
 def find_sample_fraction_thresholds(sample_fractions, tmva_chain, var_name, sample_cut, weight_name = '', include_min_max=False):
@@ -69,12 +72,9 @@ def find_signal_fraction_thresholds(signal_fractions, tmva_chain, mva_name, labe
 #  return mva_thresholds
 
 # Used branches: {'y', 'yhat', 'weight', 'observable'}
-def calculate_significance(root_filename, tree_name, branches, fixed_width=False, detail_output=False):
-  signal_fraction_edges = [0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.125]
-  #signal_fraction_edges = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
-  #signal_fraction_edges = [0.95, 0.90, 0.85, 0.80, 0.75, 0.70, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05]
-  #bins = 80
-  #signal_fraction_edges = [1-(ibin+1)/(bins) for ibin in range(bins-1)]
+def calculate_significance(root_filename, tree_name, branches, fixed_width=False, detail_output=False, nbins=8):
+  #signal_fraction_edges = [0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.125]
+  signal_fraction_edges = [1-(ibin+1)/(nbins) for ibin in range(nbins-1)]
 
   tmva_chain = ROOT.TChain(tree_name)
   tmva_chain.Add(root_filename)
@@ -135,6 +135,10 @@ def calculate_significance(root_filename, tree_name, branches, fixed_width=False
     if nevents_background == 0: 
       significances.append(0)
       #significance_errs.append(0)
+    elif (1+nevents_signal*1./nevents_background)<=0:
+      significances.append(0)
+    elif ((nevents_signal+nevents_background)*math.log(1+nevents_signal*1./nevents_background)-nevents_signal)<=0:
+      significances.append(0)
     else: 
       significances.append(math.sqrt(2*((nevents_signal+nevents_background)*math.log(1+nevents_signal*1./nevents_background)-nevents_signal)))
       significance_errs.append(math.sqrt(1/(significances[-1]**2)*((nevents_signal/nevents_background)**2)*(bin_s_err**2) + 1/(significances[-1]**2)/4*((nevents_signal/nevents_background)**4)*(bin_b_err**2)))
@@ -162,8 +166,9 @@ def calculate_significance(root_filename, tree_name, branches, fixed_width=False
 
 
 # Used branches: {'y', 'yhat', 'weight', 'observable'}
-def calculate_mass_shape_difference(root_filename, tree_name, branches, y_value=0, detail_output=False):
-  signal_fraction_edges = [0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.125]
+def calculate_mass_shape_difference(root_filename, tree_name, branches, y_value=0, detail_output=False, nbins=8):
+  #signal_fraction_edges = [0.875, 0.75, 0.625, 0.5, 0.375, 0.25, 0.125]
+  signal_fraction_edges = [1-(ibin+1)/(nbins) for ibin in range(nbins-1)]
 
   tmva_chain = ROOT.TChain(tree_name)
   tmva_chain.Add(root_filename)
@@ -274,8 +279,7 @@ def calculate_auc_sci(root_filename, tree_name, branches, detail_output=False):
   if detail_output == False: return [results[0], results[1]]
   else: return [results[0], results[1]], results
 
-def plot_feature_shapes(root_filename, tree_name, observable_name, feature_names, weight_name, split_cut, observable_cut, filename_tag):
-  nbins = 8
+def plot_feature_shapes(root_filename, tree_name, observable_name, feature_names, weight_name, split_cut, observable_cut, filename_tag, nbins=8):
   fraction_edges = [1-(ibin+1)/(nbins) for ibin in range(nbins-1)]
 
   tmva_chain = ROOT.TChain(tree_name)
@@ -385,7 +389,7 @@ def plot_feature_shapes(root_filename, tree_name, observable_name, feature_names
     # Set colors
     colors = [ROOT.kGreen-8, ROOT.kGreen-5, ROOT.kGreen+4,
               ROOT.kBlue-10, ROOT.kBlue-7, 
-              ROOT.kRed-10, ROOT.kRed-7, ROOT.kRed,]
+              ROOT.kRed-10,  ROOT.kRed-7, ROOT.kRed,]
     # Draw histogram and legend
     feature_legend = ROOT.TLegend(0.7, 0.6, 0.99, 0.99)
     for iBin, hist in enumerate(feature_histograms):
@@ -748,7 +752,7 @@ def draw_roc_detail(roc_detail_dict):
   plt.ylim(0,1)
   plt.xlim(0,1)
   plt.legend(loc='lower right')
-  filename = "plots/roc.pdf"
+  filename = f"plots/roc.pdf"
   plt.savefig(filename)
   print(f"Saved to {filename}")
 
@@ -821,12 +825,16 @@ def draw_feature_shape_difference(feature_difference_detail_dict,name_tag=''):
       # Draw base histogram
       ROOT.gStyle.SetOptStat(0)
       bkg_hist = ROOT.TH1F(f"bkg_hist_{branch}",f"{mva_name};{branch};Normalized",100,hist_x_min_max[0],hist_x_min_max[1])
-      bkg_hist.SetMinimum(hist_min_max[0])
+      #bkg_hist.SetMinimum(hist_min_max[0])
+      bkg_hist.SetMinimum(0)
       bkg_hist.SetMaximum(hist_min_max[1]*1.1)
       bkg_hist.Draw()
       # Set colors
       if len(branch_histograms) ==4:
         colors = [ROOT.kGreen-8, ROOT.kGreen+4,
+                  ROOT.kBlue-7, ROOT.kRed,]
+      elif len(branch_histograms) ==3:
+        colors = [ROOT.kGreen-8, 
                   ROOT.kBlue-7, ROOT.kRed,]
       else:
         colors = [ROOT.kGreen-8, ROOT.kGreen-5, ROOT.kGreen+4,
@@ -943,7 +951,6 @@ def draw_overtraining(overtrain_detail_dict):
 # Used branches: {'y', 'yhat', 'weight', 'observable', 'sample_id', 'bkg_ids', 'sig_ids'}
 def calculate_binned_significance(root_filename, tree_name, branches, mva_nbins=5, throw_away_bin=0, detail_output=False):
   base_cut = '1'
-  #base_cut = 'x[11]>0.8'
   #mass_window = [122, 128]
   mass_window = [120, 130]
   chain = ROOT.TChain(tree_name)
@@ -955,25 +962,192 @@ def calculate_binned_significance(root_filename, tree_name, branches, mva_nbins=
   for bkg_id in branches['bkg_ids']: mva_hists[bkg_id] = ROOT.TH1D(f'mva_hist_id{bkg_id}', 'bkg_hist_id{bkg_id}', 100, mva_min, mva_max)
   for sig_id in branches['sig_ids']: mva_hists[sig_id] = ROOT.TH1D(f'mva_hist_id{sig_id}', 'sig_hist_id{sig_id}', 100, mva_min, mva_max)
   bkg_hist = ROOT.TH1D('bkg_hist', 'bkg_hist', 100, mva_min, mva_max)
+  bkg_baseline_hist = ROOT.TH1D('bkg_baseline_hist', 'bkg_baseline_hist', 100, mva_min, mva_max)
   sig_hist = ROOT.TH1D('sig_hist', 'sig_hist', 100, mva_min, mva_max)
   # Draw mva histograms
   for sample_id in mva_hists:
     chain.Draw(f"{branches['yhat']}>>mva_hist_id{sample_id}",f"({branches['observable']}>{mass_window[0]}&&{branches['observable']}<{mass_window[1]}&&{branches['sample_id']}=={sample_id}&&{base_cut})*{branches['weight']}","goff")
   chain.Draw(f"{branches['yhat']}>>bkg_hist",f"({branches['observable']}>{mass_window[0]}&&{branches['observable']}<{mass_window[1]}&&{branches['y']}==0&&{base_cut})*{branches['weight']}","goff")
+  chain.Draw(f"{branches['yhat']}>>bkg_baseline_hist",f"({branches['y']}==0&&{base_cut})*{branches['weight']}","goff")
   chain.Draw(f"{branches['yhat']}>>sig_hist",f"({branches['observable']}>{mass_window[0]}&&{branches['observable']}<{mass_window[1]}&&{branches['y']}==1&&{base_cut})*{branches['weight']}","goff")
+  # Find bin edges
+  if f'-I{os.environ["WORK_DIR"]}/root_scripts' not in ROOT.gSystem.GetIncludePath():
+    ROOT.gSystem.AddIncludePath(f'-I{os.environ["WORK_DIR"]}/root_scripts')
+  #ROOT.gInterpreter.ProcessLine('.L evaluate_mva.C++')
+  ROOT.gInterpreter.ProcessLine('.L evaluate_mva.C+')
+  # results = [(mva_nbins, bin_edges, significance, significance_err, significances, significance_errs, signal_yield, background_yield)]
+  if detail_output == False: max_bins = mva_nbins + 1
+  else: max_bins = mva_nbins+1
+  signal_minimum = 0
+  background_minimum = 10
+  bkg_hist.Smooth(10)
+  sig_hist.Smooth(10)
+  print(f'Optimizing bins with min signal yield of {signal_minimum:.2f} and min background yield of {background_minimum:.2f}')  
+  results = ROOT.binning_optimizer(sig_hist, bkg_hist, bkg_baseline_hist, max_bins, signal_minimum, background_minimum, 1., throw_away_bin) # mva_nbins, min_signal_yield, scale, cut away bins
+  # Return results
+  if detail_output == False: return results[mva_nbins-1][2], results[mva_nbins-1][3] # significance, significance_err
+  else: 
+    # Draw lly_m for each bin
+    obs_min = chain.GetMinimum(branches['observable'])
+    obs_max = chain.GetMaximum(branches['observable'])
+    # obs_hists[sample_id] = [obs_hist for bin, ...]
+    obs_hists = {}
+    for sample_id in mva_hists: obs_hists[sample_id] = []
+    sig_obs_hists = []
+    bkg_obs_hists = []
+    bin_edges = results[mva_nbins-1][1]
+    for ibin in range(mva_nbins):
+      if ibin == 0: mva_cut = f'{branches["yhat"]}<{bin_edges[0]}'
+      elif ibin == mva_nbins-1: mva_cut = f'{branches["yhat"]}>{bin_edges[mva_nbins-2]}'
+      else: mva_cut = f'{branches["yhat"]}>{bin_edges[ibin-1]}&&{branches["yhat"]}<{bin_edges[ibin]}'
+      # Draw obs_hist
+      for sample_id in mva_hists: 
+        obs_hist = ROOT.TH1D(f'obs_hist_id{sample_id}_bin{ibin}',f'obs_hist_id{sample_id}_bin{ibin}',100,obs_min,obs_max)
+        chain.Draw(f"{branches['observable']}>>obs_hist_id{sample_id}_bin{ibin}",f"({mva_cut}&&{branches['sample_id']}=={sample_id}&&{base_cut})*{branches['weight']}","goff")
+        obs_hists[sample_id].append(obs_hist)
+      sig_obs_hist = ROOT.TH1D(f'sig_hist_bin{ibin}',f'sig_hist_bin{ibin}',100,obs_min,obs_max)
+      chain.Draw(f"{branches['observable']}>>sig_hist_bin{ibin}",f"({mva_cut}&&{branches['y']}==1&&{base_cut})*{branches['weight']}","goff")
+      sig_obs_hists.append(sig_obs_hist)
+      bkg_obs_hist = ROOT.TH1D(f'bkg_hist_bin{ibin}',f'bkg_hist_bin{ibin}',100,obs_min,obs_max)
+      chain.Draw(f"{branches['observable']}>>bkg_hist_bin{ibin}",f"({mva_cut}&&{branches['y']}==0&&{base_cut})*{branches['weight']}","goff")
+      bkg_obs_hists.append(bkg_obs_hist)
+    return results[mva_nbins-1][2], results[mva_nbins-1][3], [mva_nbins, results, sig_hist, bkg_hist, sig_obs_hists, bkg_obs_hists, mva_hists, obs_hists, branches['sig_ids'], branches['bkg_ids']]
+
+# Used branches: {'y', 'yhat', 'weight', 'observable', 'sample_id', 'bkg_ids', 'sig_ids'}
+def calculate_binned_significance_resolution(root_filename, tree_name, branches, mva_nbins=5, throw_away_bin=0, detail_output=False):
+  base_cut = '1'
+  mass_window = [120, 130]
+  chain = ROOT.TChain(tree_name)
+  chain.Add(root_filename)
+  mva_min = chain.GetMinimum(branches['yhat'])
+  mva_max = chain.GetMaximum(branches['yhat'])
+
+  # Make mva historams
+  mva_hist_bins = 100
+
+  # Make hist with equal signal efficiency MVA bins
+  # Split sample by equal signal efficiency bins. 
+  signal_fraction_edges = [1-(ibin+1)/(mva_hist_bins) for ibin in range(mva_hist_bins-1)]
+  mva_threshold_edges = find_sample_fraction_thresholds(signal_fraction_edges, chain, branches['yhat'], f'{branches["y"]}==1', branches['weight'], True)
+  mva_threshold_edges = array.array('d',mva_threshold_edges)
+  mva_hists = {}
+  for bkg_id in branches['bkg_ids']: mva_hists[bkg_id] = ROOT.TH1D(f'mva_hist_id{bkg_id}', 'bkg_hist_id{bkg_id}', mva_hist_bins, mva_threshold_edges)
+  for sig_id in branches['sig_ids']: mva_hists[sig_id] = ROOT.TH1D(f'mva_hist_id{sig_id}', 'sig_hist_id{sig_id}', mva_hist_bins, mva_threshold_edges)
+  bkg_hist = ROOT.TH1D('bkg_hist', 'bkg_hist', mva_hist_bins, mva_threshold_edges)
+  bkg_baseline_hist = ROOT.TH1D('bkg_baseline_hist', 'bkg_baseline_hist', mva_hist_bins, mva_threshold_edges)
+  sig_hist = ROOT.TH1D('sig_hist', 'sig_hist', mva_hist_bins, mva_threshold_edges)
+
+  # Make hist with MVA bins
+  #mva_hists = {}
+  #for bkg_id in branches['bkg_ids']: mva_hists[bkg_id] = ROOT.TH1D(f'mva_hist_id{bkg_id}', 'bkg_hist_id{bkg_id}', 100, mva_min, mva_max)
+  #for sig_id in branches['sig_ids']: mva_hists[sig_id] = ROOT.TH1D(f'mva_hist_id{sig_id}', 'sig_hist_id{sig_id}', 100, mva_min, mva_max)
+  #bkg_hist = ROOT.TH1D('bkg_hist', 'bkg_hist', mva_hist_bins, mva_min, mva_max)
+  #bkg_baseline_hist = ROOT.TH1D('bkg_baseline_hist', 'bkg_baseline_hist', mva_hist_bins, mva_min, mva_max)
+  #sig_hist = ROOT.TH1D('sig_hist', 'sig_hist', mva_hist_bins, mva_min, mva_max)
+
+  # Draw mva histograms
+  for sample_id in mva_hists:
+    chain.Draw(f"{branches['yhat']}>>mva_hist_id{sample_id}",f"({branches['observable']}>{mass_window[0]}&&{branches['observable']}<{mass_window[1]}&&{branches['sample_id']}=={sample_id}&&{base_cut})*{branches['weight']}","goff")
+  chain.Draw(f"{branches['yhat']}>>bkg_hist",f"({branches['observable']}>{mass_window[0]}&&{branches['observable']}<{mass_window[1]}&&{branches['y']}==0&&{base_cut})*{branches['weight']}","goff")
+  chain.Draw(f"{branches['yhat']}>>bkg_baseline_hist",f"({branches['y']}==0&&{base_cut})*{branches['weight']}","goff")
+  chain.Draw(f"{branches['yhat']}>>sig_hist",f"({branches['observable']}>{mass_window[0]}&&{branches['observable']}<{mass_window[1]}&&{branches['y']}==1&&{base_cut})*{branches['weight']}","goff")
+
+  # TODO
+  # Make histogram based on signal resolution
+  # For each mva bin
+  #   Find signal mass resolution
+  #   Find signal and background in mass resolution
+
+  ## Print bins of sig_hist
+  #for ibin in range(mva_hist_bins):
+  #  print(sig_hist.GetBinLowEdge(ibin+1),sig_hist.GetBinWidth(ibin+1),sig_hist.GetBinContent(ibin+1))
+  #print(sig_hist.GetSum())
   # Find bin edges
   if f'-I{os.environ["WORK_DIR"]}/root_scripts' not in ROOT.gSystem.GetIncludePath():
     ROOT.gSystem.AddIncludePath(f'-I{os.environ["WORK_DIR"]}/root_scripts')
   ROOT.gInterpreter.ProcessLine('.L evaluate_mva.C+')
   # results = [(mva_nbins, bin_edges, significance, significance_err, significances, significance_errs, signal_yield, background_yield)]
-  if detail_output == False: max_bins = mva_nbins
+  if detail_output == False: max_bins = mva_nbins + 1
   else: max_bins = mva_nbins+1
-  # Set min signal to 10% of total signal yield
-  signal_10percent = sig_hist.GetSum()/10
+  signal_minimum = 0
+  background_minimum = 10
+  bkg_baseline_hist.Smooth(10)
   bkg_hist.Smooth(10)
   sig_hist.Smooth(10)
-  print(f'Optimizing bins with min signal yeild of {signal_10percent:.2f}, which is 10% of signal.')  
-  results = ROOT.binning_optimizer(sig_hist, bkg_hist, max_bins, signal_10percent, 1., throw_away_bin) # mva_nbins, min_signal_yield, scale, cut away bins
+  print(f'Optimizing bins with min signal yield of {signal_minimum:.2f} and min background yield of {background_minimum:.2f}')  
+  results = ROOT.binning_optimizer_resolution(sig_hist, bkg_hist, bkg_baseline_hist, max_bins, signal_minimum, background_minimum, 1., throw_away_bin) # mva_nbins, min_signal_yield, scale, cut away bins
+
+  # Evaluate bin results using signal resolution. Replace results
+  # results = [nbins, [bin_edge], max_significance, max_significance_err, [significance for bin], [significance err for bin], [nsignal for bin], [nbackground for bin]]
+  #print(results[mva_nbins-1])
+  # Make into a python object
+  result_resolution = [item for item in results[mva_nbins-1]]
+  result_resolution[1] = [item for item in result_resolution[1]]
+  result_resolution[4] = [item for item in result_resolution[4]]
+  result_resolution[5] = [item for item in result_resolution[5]]
+  result_resolution[6] = [item for item in result_resolution[6]]
+  result_resolution[7] = [item for item in result_resolution[7]]
+  hist = ROOT.TH1F("hist","hist",160,100,180)
+  bin_edges = results[mva_nbins-1][1]
+  for ibin in range(mva_nbins):
+    # Get MVA cut for bin
+    if ibin == 0: mva_cut = f'{branches["yhat"]}<{bin_edges[0]}'
+    elif ibin == mva_nbins-1: mva_cut = f'{branches["yhat"]}>{bin_edges[mva_nbins-2]}'
+    else: mva_cut = f'{branches["yhat"]}>{bin_edges[ibin-1]}&&{branches["yhat"]}<{bin_edges[ibin]}'
+    # Get signal mass window
+    entries = chain.Draw(f'{branches["observable"]}>>hist',f'({branches["y"]}==1&&{mva_cut})*{branches["weight"]}',"goff")
+    mass_fractions = [0.95, 0.05] # 2 sigma
+    mass_quantiles = array.array('d', [0.]*len(mass_fractions))
+    mass_fractions = array.array('d', [1.-mass_fraction for mass_fraction in mass_fractions])
+    hist.GetQuantiles(len(mass_fractions), mass_quantiles, mass_fractions)
+    mass_thresholds = mass_quantiles.tolist()
+    # Find signal and background yield within signal mass window
+    mass_window = f'{branches["observable"]}<{mass_thresholds[1]}&&{branches["observable"]}>{mass_thresholds[0]}' 
+    # For signal
+    chain.Draw(f"{branches['observable']}>>hist",f'({branches["y"]}==1&&{mva_cut}&&{mass_window})*{branches["weight"]}',"goff")
+    nentries_signal = hist.GetEntries()
+    bin_s_err = ctypes.c_double()
+    nevents_signal = hist.IntegralAndError(0,hist.GetNbinsX()+1, bin_s_err);
+    bin_s_err = bin_s_err.value
+    # For background
+    chain.Draw(f"{branches['observable']}>>hist",f'({branches["y"]}==0&&{mva_cut}&&{mass_window})*{branches["weight"]}',"goff")
+    nentries_background = hist.GetEntries()
+    bin_b_err = ctypes.c_double()
+    nevents_background = hist.IntegralAndError(0,hist.GetNbinsX()+1, bin_b_err);
+    bin_b_err = bin_b_err.value
+    if nevents_background <= 0: 
+      nevents_background = 0.01
+      bin_b_err = 0.01
+    # For background baseline
+    chain.Draw(f"{branches['observable']}>>hist",f'({branches["y"]}==0&&{mva_cut})*{branches["weight"]}',"goff")
+    nentries_background_baseline = hist.GetEntries()
+    bin_b_baseline_err = ctypes.c_double()
+    nevents_background_baseline = hist.IntegralAndError(0,hist.GetNbinsX()+1, bin_b_baseline_err);
+    bin_b_baseline_err = bin_b_baseline_err.value
+    # Calculate significance
+    #print(f'ibin: {ibin} mva_cut: {mva_cut} mass_window: {mass_window} n_signal: {nevents_signal}, {nentries_signal} +- {bin_s_err} n_background: {nevents_background} {nentries_background} +- {bin_b_err} b_baseline: {nevents_background_baseline} {nentries_background_baseline} +- {bin_b_baseline_err}')
+    significance = math.sqrt(2*((nevents_signal+nevents_background)*math.log(1+nevents_signal*1./nevents_background)-nevents_signal))
+    significance_err = math.sqrt(1/(significance**2)*((nevents_signal/nevents_background)**2)*(bin_s_err**2) + 1/(significance**2)/4*((nevents_signal/nevents_background)**4)*(bin_b_err**2))
+    #print(f'ibin: {ibin} mva_cut: {mva_cut} mass_window: {mass_window} n_signal: {nevents_signal}, {nentries_signal} +- {bin_s_err} n_background: {nevents_background} {nentries_background} +- {bin_b_err} significance: {significance} significance_err: {significance_err}')
+    # Save results for bin
+    result_resolution[4][ibin] = significance
+    result_resolution[5][ibin] = significance_err
+    result_resolution[6][ibin] = nevents_signal
+    result_resolution[7][ibin] = nevents_background
+  # Calculate combined significance
+  integrated_significance = 0.
+  for significance in result_resolution[4]:
+    integrated_significance += significance**2
+  integrated_significance = math.sqrt(integrated_significance)
+  integrated_significance_err = 0.
+  for significance_err in result_resolution[5]:
+    integrated_significance_err += significance_err**2
+  integrated_significance_err = math.sqrt(integrated_significance_err)
+  # Save result
+  result_resolution[2] = integrated_significance
+  result_resolution[3] = integrated_significance_err
+  results = [[] for item in range(mva_nbins)]
+  results[mva_nbins-1] = result_resolution
   # Return results
   if detail_output == False: return results[mva_nbins-1][2], results[mva_nbins-1][3] # significance, significance_err
   else: 
@@ -1009,9 +1183,29 @@ def draw_binned_signi_detail(binned_signi_detail_dict, name_tag=''):
   else: _name_tag = ''
   for mva_name in binned_signi_detail_dict:
     # Draw (signal hist, bkg hist, location of cuts, significances, signal yield, bkg yield, total significance)
-    mva_nbins, binned_signi_detail, sig_hist, bkg_hist, sig_obs_hists, bkg_obs_hists, mva_hists, obs_hists, sig_ids, bkg_ids = binned_signi_detail_dict[mva_name]
-    nbins, bin_edges, significance, significance_err, significances, significance_errs, signal_yield, background_yield = binned_signi_detail[mva_nbins-1]
+    mva_nbins, binned_signi_info, sig_hist, bkg_hist, sig_obs_hists, bkg_obs_hists, mva_hists, obs_hists, sig_ids, bkg_ids = binned_signi_detail_dict[mva_name]
+    nbins, bin_edges, significance, significance_err, significances, significance_errs, signal_yield, background_yield = binned_signi_info[mva_nbins-1]
     #print(nbins, bin_edges, significance, significances, signal_yield, background_yield)
+
+    # Make significance graph
+    mva_array = array.array('d', [0]*sig_hist.GetNbinsX())
+    significance_array = array.array('d', [0]*sig_hist.GetNbinsX())
+    purity_array = array.array('d', [0]*sig_hist.GetNbinsX())
+    for ibin in range(1,sig_hist.GetNbinsX()+1):
+      #print(ibin, sig_hist.GetBinContent(ibin), bkg_hist.GetBinContent(ibin))
+      bin_s = sig_hist.GetBinContent(ibin)
+      bin_b = bkg_hist.GetBinContent(ibin)
+      mva_array[ibin-1] = sig_hist.GetBinCenter(ibin)
+      if bin_b <= 0: bin_significance = 0.
+      #else: bin_significance = bin_s/math.sqrt(bin_b)
+      elif ((bin_b)*math.log(1+bin_s*1./bin_b)-bin_s)<=0: bin_significance = 0.
+      else: bin_significance = math.sqrt(2*((bin_b)*math.log(1+bin_s*1./bin_b)-bin_s))
+      significance_array[ibin-1] = bin_significance
+      if bin_b <= 0: bin_purity = 0.
+      else: bin_purity = bin_s*1./(bin_b+bin_s)
+      purity_array[ibin-1] = bin_purity
+    significance_max = max(significance_array)
+    purity_max = max(purity_array)
 
     # Draw mva signal and background
     c1 = new_canvas()
@@ -1033,14 +1227,35 @@ def draw_binned_signi_detail(binned_signi_detail_dict, name_tag=''):
     # Significance box
     box = ROOT.TPaveText(0.2, 0.8, 0.5, 1., 'NDC NB')
     box.AddText(f'{mva_nbins}-bin signi.: {significance:.3f}+-{significance_err:.3f}')
+    edge_string = 'Bin edges: '
+    for iEdge in range(len(bin_edges)):
+      edge_string += f'{bin_edges[iEdge]:.3f}, '
+    box.AddText(edge_string)
     for ibin in range(mva_nbins):
-      box.AddText(f'bin{ibin+1} signi:{significances[ibin]:.3f}+-{significance_errs[ibin]:.3f}, sig:{signal_yield[ibin]:.1f}, bkg:{background_yield[ibin]:.1f}')
+      box.AddText(f'bin{mva_nbins-ibin} signi:{significances[ibin]:.3f}+-{significance_errs[ibin]:.3f}, sig:{signal_yield[ibin]:.1f}, bkg:{background_yield[ibin]:.1f}')
     box.Draw()
+    # Scale signifiances to y_max
+    for ibin in range(sig_hist.GetNbinsX()):
+      significance_array[ibin] = significance_array[ibin] * y_max / significance_max
+    # Draw significance graph
+    significance_graph = ROOT.TGraph(sig_hist.GetNbinsX(), mva_array, significance_array)
+    significance_graph.Draw("same")
+    # Scale purity to y_max
+    for ibin in range(sig_hist.GetNbinsX()):
+      purity_array[ibin] = purity_array[ibin] * y_max / purity_max
+    # Draw significance graph
+    purity_graph = ROOT.TGraph(sig_hist.GetNbinsX(), mva_array, purity_array)
+    purity_graph.SetLineColor(ROOT.kGreen)
+    purity_graph.Draw("same")
+
     # Legend box
-    legend = ROOT.TLegend(0.6, 0.85, 0.95, 0.95)
+    legend = ROOT.TLegend(0.6, 0.90, 0.95, 0.99)
     legend.AddEntry(sig_hist, 'signal')
     legend.AddEntry(bkg_hist, 'background')
+    legend.AddEntry(significance_graph, 'significance')
+    legend.AddEntry(purity_graph, 'purity')
     legend.Draw()
+
     c1.SaveAs(f'plots/{mva_name}_binned_mva{_name_tag}.pdf')
 
     # Draw mva sample
@@ -1053,6 +1268,7 @@ def draw_binned_signi_detail(binned_signi_detail_dict, name_tag=''):
       mva_hist.SetLineColor(colors[isample])
       mva_hist.SetTitle(';MVA value;Normalized')
       y_max = max(y_max, mva_hist.GetMaximum())
+      if mva_hist.GetSumOfWeights()<=0: continue
       normalize_hist(mva_hist)
       if isample==0: mva_hist.Draw()
       else: mva_hist.Draw('same')
@@ -1067,8 +1283,12 @@ def draw_binned_signi_detail(binned_signi_detail_dict, name_tag=''):
     box = ROOT.TPaveText(0.2, 0.8, 0.5, 1., 'NDC NB')
     if name_tag != '':box.AddText(f'({name_tag}) {mva_nbins}-bin signi.: {significance:.3f}+-{significance_err:.3f}')
     else: box.AddText(f'{mva_nbins}-bin signi.: {significance:.3f}+-{significance_err:.3f}')
+    edge_string = 'Bin edges: '
+    for iEdge in range(len(bin_edges)):
+      edge_string += f'{bin_edges[iEdge]:.3f}, '
+    box.AddText(edge_string)
     for ibin in range(mva_nbins):
-      box.AddText(f'bin{ibin+1} signi:{significances[ibin]:.3f}+-{significance_errs[ibin]:.3f}, sig:{signal_yield[ibin]:.1f}, bkg:{background_yield[ibin]:.1f}')
+      box.AddText(f'bin{mva_nbins-ibin} signi:{significances[ibin]:.3f}+-{significance_errs[ibin]:.3f}, sig:{signal_yield[ibin]:.1f}, bkg:{background_yield[ibin]:.1f}')
     box.Draw()
     # Legend box
     legend = ROOT.TLegend(0.6, 0.90, 0.95, 0.98)
@@ -1096,7 +1316,13 @@ def draw_binned_signi_detail(binned_signi_detail_dict, name_tag=''):
       box = ROOT.TPaveText(0.2, 0.9, 0.5, 0.98, 'NDC NB')
       box.SetFillColorAlpha(0,0)
       box.AddText(f'Total signi.: {significance:.3f}+-{significance_err:.3f}')
-      box.AddText(f'bin{ibin+1} signi.: {significances[ibin]:.3f}+-{significance_errs[ibin]:.3f}')
+      # Add mva bin
+      mva_string = ''
+      if ibin == 0: mva_string = f'MVA<{bin_edges[ibin]:.3f}'
+      elif ibin == len(bin_edges): mva_string = f'MVA>{bin_edges[ibin-1]:.3f}'
+      else: mva_string = f'{bin_edges[ibin-1]:.3f}<MVA<{bin_edges[ibin]:.3f}'
+      box.AddText(mva_string)
+      box.AddText(f'bin{mva_nbins-ibin} signi.: {significances[ibin]:.3f}+-{significance_errs[ibin]:.3f}')
       box.Draw()
       # Draw legend
       c2.SaveAs(f'plots/{mva_name}_binned_mva_mlly_bin{ibin}{_name_tag}.pdf')
@@ -1136,7 +1362,13 @@ def draw_binned_signi_detail(binned_signi_detail_dict, name_tag=''):
       box = ROOT.TPaveText(0.2, 0.9, 0.5, 0.98, 'NDC NB')
       box.SetFillColorAlpha(0,0)
       box.AddText(f'Total signi.: {significance:.3f}+-{significance_err:.3f}')
-      box.AddText(f'bin{ibin+1} signi.: {significances[ibin]:.3f}+-{significance_errs[ibin]:.3f}')
+      # Add mva bin
+      mva_string = ''
+      if ibin == 0: mva_string = f'MVA<{bin_edges[ibin]:.3f}'
+      elif ibin == len(bin_edges): mva_string = f'MVA>{bin_edges[ibin-1]:.3f}'
+      else: mva_string = f'{bin_edges[ibin-1]:.3f}<MVA<{bin_edges[ibin]:.3f}'
+      box.AddText(mva_string)
+      box.AddText(f'bin{mva_nbins-ibin} signi.: {significances[ibin]:.3f}+-{significance_errs[ibin]:.3f}')
       box.Draw()
       # Draw legend
       c4.SaveAs(f'plots/{mva_name}_binned_mva_mlly_bin{ibin}_per_sample{_name_tag}.pdf')
@@ -1145,8 +1377,8 @@ def draw_binned_signi_detail(binned_signi_detail_dict, name_tag=''):
 def draw_binned_signi_detail_train_eval(binned_signi_detail_dict, train_binned_signi_detail_dict):
   for mva_name in binned_signi_detail_dict:
     # Draw (signal hist, bkg hist, location of cuts, significances, signal yield, bkg yield, total significance)
-    mva_nbins, binned_signi_detail, sig_hist, bkg_hist, sig_obs_hists, bkg_obs_hists, mva_hists, obs_hists, sig_ids, bkg_ids = binned_signi_detail_dict[mva_name]
-    nbins, bin_edges, significance, significance_err, significances, significance_errs, signal_yield, background_yield = binned_signi_detail[mva_nbins-1]
+    mva_nbins, binned_signi_info, sig_hist, bkg_hist, sig_obs_hists, bkg_obs_hists, mva_hists, obs_hists, sig_ids, bkg_ids = binned_signi_detail_dict[mva_name]
+    nbins, bin_edges, significance, significance_err, significances, significance_errs, signal_yield, background_yield = binned_signi_info[mva_nbins-1]
     #print(nbins, bin_edges, significance, significances, signal_yield, background_yield)
     train_mva_nbins, train_binned_signi_detail, train_sig_hist, train_bkg_hist, train_sig_obs_hists, train_bkg_obs_hists, train_mva_hists, train_obs_hists, train_sig_ids, train_bkg_ids = train_binned_signi_detail_dict[mva_name]
     train_nbins, train_bin_edges, train_significance, train_significance_err, train_significances, train_significance_errs, train_signal_yield, train_background_yield = train_binned_signi_detail[train_mva_nbins-1]

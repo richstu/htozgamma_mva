@@ -15,7 +15,7 @@ import uproot
 import shap
 import matplotlib.pyplot as plt
 
-def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight_name, train_tree_name, eval_tree_name, train_cut, features, prepare_tree_setting, bdt_setting):
+def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight_name, train_tree_name, eval_tree_name, train_cut, features, spectators, prepare_tree_setting, bdt_setting):
   output = TFile.Open(tmva_filename, 'RECREATE')
   factory = TMVA.Factory('TMVAClassification', output,
                          '!V:ROC:!Correlations:!Silent:Color:'
@@ -25,9 +25,8 @@ def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight
     dataloader.AddVariable(feature,'F')
   dataloader.SetBackgroundWeightExpression(weight_name)
   dataloader.SetSignalWeightExpression(weight_name)
-  dataloader.AddSpectator("lly_m", 'F')
-  dataloader.AddSpectator("weightXyear", 'F')
-  dataloader.AddSpectator("w_lumiXyear", 'F')
+  for spectator in spectators:
+    dataloader.AddSpectator(spectator, 'F')
   dataloader.AddSpectator("sampleID", 'I')
 
   # Add data.
@@ -41,7 +40,8 @@ def train_bdt(model_folder, train_filename, test_filename, tmva_filename, weight
   dataloader.AddTree(test_chain, 'Signal', 1., 'classID==1', TMVA.Types.kTesting)
   cut_s = TCut(train_cut);
   cut_b = TCut(train_cut);
-  dataloader.PrepareTrainingAndTestTree(cut_s,cut_b,f"NormMode=NumEvents:ScaleWithPreselEff:!V");
+  #dataloader.PrepareTrainingAndTestTree(cut_s,cut_b,f"NormMode=NumEvents:ScaleWithPreselEff:!V");
+  dataloader.PrepareTrainingAndTestTree(cut_s,cut_b,f"NormMode=None:ScaleWithPreselEff:!V");
 
   factory.BookMethod(dataloader,TMVA.Types.kBDT,"BDT", bdt_setting);
   factory.TrainAllMethods();
@@ -104,6 +104,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -114,6 +115,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree_baseline'
     input_mva_ntuple = 'ntuples/ggf_mva_hig19014_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '(lly_m>120&&lly_m<130)'
@@ -124,6 +126,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree_baseline'
     input_mva_ntuple = 'ntuples/ggf_mva_hig19014_decorr_ntuples.root'
     features = ['y_mva', 'yl_drmin', 'yl_drmax', 'cosThetamass3', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta', 'l2_pt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '(lly_m>120&&lly_m<130)'
@@ -134,6 +137,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree_baseline'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -144,6 +148,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -154,6 +159,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_yptmass3_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -164,6 +170,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_yptmass2_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -174,6 +181,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_cosTheta_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosTheta', 'costheta', 'phi', 'lly_ptmass', 'y_eta', 'l1_eta', 'l2_eta']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -184,6 +192,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt', 'leplep_flavor', 'leplep_m', 'leplep_eta', 'lly_ptt', 'lly_eta', 'ht']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -194,6 +203,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'ht']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -204,6 +214,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'lly_ptt', 'ht']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -214,6 +225,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'ht', 'y_ptinfo2mass2']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -224,6 +236,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -234,6 +247,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt', 'leplep_flavor', 'leplep_m', 'leplep_eta', 'lly_ptt', 'lly_eta']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -244,6 +258,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt','y_ptinfo2mass2']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -254,6 +269,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'l1_ptmass', 'l2_pt', 'leplep_flavor', 'leplep_m', 'leplep_eta', 'lly_ptt', 'lly_eta','y_ptinfo2mass2']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -264,6 +280,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=850:MinNodeSize=4%:MaxDepth=4:BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -274,6 +291,7 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt','y_ptinfo2mass2']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=850:MinNodeSize=4%:MaxDepth=4:BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
@@ -284,7 +302,316 @@ if __name__ == "__main__":
     eval_tree_name = 'eval_tree'
     input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
     features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
     bdt_setting = "!H:!V:NTrees=850:MinNodeSize=4%:MaxDepth=4:BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 19: 
+    bdt_name = 'tmva_bdt_tight_higwindow_var11'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 20: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var12'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 21: 
+    bdt_name = 'tmva_bdtg_tight_higwindow_var12'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptmass']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=850:MinNodeSize=4%:MaxDepth=4:BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 22: 
+    bdt_name = 'tmva_bdtg_tight_higwindow_var11'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=850:MinNodeSize=4%:MaxDepth=4:BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 23: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var12cosh'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptinfo2mass2']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 24: 
+    bdt_name = 'tmva_bdtg_tight_higwindow_var12cosh'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva','yl_drmin','yl_drmax','lly_ptmass','cosTheta','costheta','phi','y_res','y_eta','l1_eta','l2_eta', 'y_ptinfo2mass2']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=850:MinNodeSize=4%:MaxDepth=4:BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 25: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var13'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 26: 
+    bdt_name = 'tmva_bdtg_tight_higwindow_var13'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=850:MinNodeSize=4%:MaxDepth=4:BoostType=Grad:Shrinkage=0.1:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 27: 
+    bdt_name = 'tmva_bdta_tight0j_higwindow_var13'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_tight0j_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 28: 
+    bdt_name = 'tmva_bdta_tight1j_higwindow_var13'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_tight1j_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 29: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var12'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear', 'costheta']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 30: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var10'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'cosThetamass', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear', 'costheta', 'yl_drmin', 'yl_drmax']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 31: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var14'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'npv']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 32: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var7'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'cosThetamass', 'phi', 'lly_ptmass', 'y_res', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear', 'costheta', 'yl_drmin', 'yl_drmax', 'y_eta', 'l1_eta', 'l2_eta']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 33: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var6'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'cosThetamass', 'phi', 'lly_ptmass', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear', 'costheta', 'yl_drmin', 'yl_drmax', 'y_eta', 'l1_eta', 'l2_eta', 'y_res']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 34: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var5'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'cosThetamass', 'phi', 'lly_ptmass', 'leplep_m']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear', 'costheta', 'yl_drmin', 'yl_drmax', 'y_eta', 'l1_eta', 'l2_eta', 'y_res', 'lly_ptt']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 35: 
+    bdt_name = 'tmva_bdta_tight_higwindow_var3'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_mva_decorr_ntuples.root'
+    features = ['y_mva', 'phi', 'lly_ptmass']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear', 'costheta', 'yl_drmin', 'yl_drmax', 'y_eta', 'l1_eta', 'l2_eta', 'y_res', 'lly_ptt', 'cosThetamass', 'leplep_m']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 36: 
+    bdt_name = 'tmva_bdta_tight1j_higwindow_var19'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggf_tight1j_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'j1_pt', 'j1_eta', 'j1_phi', 'llyj_dphi', 'yj1_deta', 'yj1_dr', 'llyj1_ptbal']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 37: 
+    bdt_name = 'tmva_bdta_ggfvbf_tight1j_higwindow_var19'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight1j_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'j1_pt', 'j1_eta', 'j1_phi', 'llyj_dphi', 'yj1_deta', 'yj1_dr', 'llyj1_ptbal']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 38: 
+    bdt_name = 'tmva_bdta_ggfvbf_tight0j_higwindow_var13'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight0j_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 39: 
+    bdt_name = 'tmva_bdta_ggfvbf_tight1j_higwindow_var13'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight1j_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 40: 
+    bdt_name = 'tmva_bdta_ggfvbf_tight_higwindow_var13'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 41: 
+    bdt_name = 'tmva_bdta_ggfvbf_tight1j_higwindow_var15'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight1j_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'llyj_dphi', 'yj1_dr']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 42: 
+    bdt_name = 'tmva_bdta_ggfvbf_tight_higwindow_var15'
+    weight_name = 'weightXyear'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight_decorr_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'llyj_dphi', 'yj1_dr']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 43: 
+    bdt_name = 'tmva_bdta_wgt11_ggfvbf_tight_higwindow_var15'
+    weight_name = 'wgt11'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight_shape_decorr_weight_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'llyj_dphi', 'yj1_dr']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 44: 
+    bdt_name = 'tmva_bdta_wgt_ggfvbf_tight_higwindow_var15'
+    weight_name = 'wgt'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight_shape_decorr_weight_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'llyj_dphi', 'yj1_dr']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 45: 
+    bdt_name = 'tmva_bdta_wgteq1_ggfvbf_tight_higwindow_var15'
+    weight_name = 'wgteq1'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight_shape_decorr_weight_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'llyj_dphi', 'yj1_dr']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
+    prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
+    train_cut = '1'
+  if method_id == 46: 
+    bdt_name = 'tmva_bdta_wgtsigres11_ggfvbf_tight_higwindow_var15'
+    weight_name = 'wgtsigres11'
+    train_tree_name = 'train_tree'
+    eval_tree_name = 'eval_tree'
+    input_mva_ntuple = 'ntuples/ggfvbf_tight_shape_decorr_weight_ntuples.root'
+    features = ['y_mva', 'yl_drminmass', 'yl_drmax', 'cosThetamass', 'costheta', 'phi', 'lly_ptmass', 'y_res', 'y_eta', 'l1_eta', 'l2_eta', 'leplep_m', 'lly_ptt', 'llyj_dphi', 'yj1_dr']
+    spectators = ['lly_m', 'weightXyear', 'w_lumiXyear']
+    bdt_setting = "!H:!V:NTrees=350:MinNodeSize=4%:MaxDepth=3:BoostType=AdaBoost:AdaBoostBeta=0.5:UseBaggedBoost:BaggedSampleFraction=0.5:SeparationType=GiniIndex:nCuts=20:PruneMethod=NoPruning"
     prepare_tree_setting = "NormMode=NumEvents:ScaleWithPreselEff:!V"
     train_cut = '1'
   print(f'Training with method_id: {method_id}, {bdt_name}')
@@ -306,6 +633,7 @@ if __name__ == "__main__":
             eval_tree_name=eval_tree_name,
             train_cut = train_cut,
             features=features,
+            spectators=spectators,
             prepare_tree_setting=prepare_tree_setting,
             bdt_setting=bdt_setting)
   

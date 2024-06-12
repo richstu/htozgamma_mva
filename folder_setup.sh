@@ -1,7 +1,4 @@
-mkdir ggf/mva_output
-mkdir ggf/ntuples
-mkdir ggf/plots
-
-mkdir vbf/mva_output
-mkdir vbf/ntuples
-mkdir vbf/plots
+mkdir ggfvbf/mva_output
+mkdir ggfvbf/ntuples
+mkdir ggfvbf/plots
+mkdir ggfvbf/tables
