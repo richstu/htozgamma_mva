@@ -12,7 +12,7 @@ source set_env.sh
 python3 -m venv py-env
 source py-env/bin/activate
 pip3 install --upgrade pip
-pip3 install uproot numpy scikit-learn matplotlib xgboost shap 
+pip3 install uproot "numpy<2.0" scikit-learn matplotlib xgboost shap 
 pip3 install torch --index-url https://download.pytorch.org/whl/cpu
 ```
 
